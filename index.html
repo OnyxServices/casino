@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onyx Casino | Elite Betting</title>
     
-    <!-- Brython Core y StdLib -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
-    
-    <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
-    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -23,12 +18,13 @@
             --glass: rgba(15, 15, 15, 0.9);
             --danger: #ff4b2b;
             --success: #00ff87;
+            --info: #3498db;
         }
 
         body {
             font-family: 'Poppins', 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 20px 0; /* Espacio para scroll en móviles */
+            padding: 20px 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -38,16 +34,11 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            box-sizing: border-box;
         }
 
-        /* CAPA DE VICTORIA GIGANTE */
         #celebracion-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
             display: none;
             flex-direction: column;
@@ -64,11 +55,8 @@
             text-transform: uppercase;
             text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
             text-align: center;
-            margin: 0;
-            padding: 20px;
         }
 
-        /* CONTENEDOR PRINCIPAL - AJUSTE RESPONSIVO */
         .casino-container {
             background: var(--glass);
             backdrop-filter: blur(15px);
@@ -80,16 +68,6 @@
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             position: relative;
-            z-index: 10;
-            margin: auto;
-        }
-
-        h1 {
-            color: var(--gold);
-            font-size: clamp(1.5rem, 8vw, 2.2rem);
-            margin: 0 0 0.5rem 0;
-            text-transform: uppercase;
-            letter-spacing: 4px;
         }
 
         .shimmer {
@@ -99,18 +77,26 @@
             -webkit-text-fill-color: transparent;
             animation: shine 3s linear infinite;
         }
-
         @keyframes shine { to { background-position: 200% center; } }
 
-        .balance-label { color: #aaa; font-size: 0.75rem; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;}
-        
         .puntos-display {
             font-size: 2.3rem;
             color: white;
             font-weight: 800;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
-        .puntos-display span { color: var(--gold); font-size: 0.9rem; margin-left: 5px; }
+        .puntos-display span { color: var(--gold); font-size: 0.9rem; }
+
+        .intentos-badge {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold-light);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            border: 1px solid var(--gold);
+        }
 
         .input-group {
             background: rgba(255,255,255,0.05);
@@ -119,12 +105,11 @@
             margin-bottom: 15px;
         }
 
-        label { display: block; color: var(--gold-light); font-size: 0.7rem; margin-bottom: 8px; text-align: center; font-weight: bold; opacity: 0.8;}
+        label { display: block; color: var(--gold-light); font-size: 0.7rem; margin-bottom: 8px; font-weight: bold; opacity: 0.8;}
 
-        /* NÚMEROS CENTRADOS EN INPUTS */
         input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #000;
             border: 1px solid #333;
             border-radius: 10px;
@@ -132,15 +117,7 @@
             font-size: 1.2rem;
             margin-bottom: 15px;
             box-sizing: border-box;
-            text-align: center; /* Centro los números aquí */
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+            text-align: center;
         }
 
         button {
@@ -151,229 +128,196 @@
             font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
             transition: all 0.3s;
-            font-size: 1rem;
+            margin-bottom: 10px;
         }
 
         #btn-jugar {
             background: linear-gradient(45deg, #d4af37, #f1d592);
             color: #000;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
-        #btn-jugar:active { transform: scale(0.98); }
-
-        #btn-reiniciar {
-            background: var(--danger);
+        #btn-extra {
+            background: var(--info);
             color: white;
-            margin-top: 15px;
+            font-size: 0.8rem;
+            padding: 10px;
+        }
+
+        #btn-reiniciar { background: var(--danger); color: white; display: none; }
+
+        #timer-container {
             display: none;
+            color: var(--danger);
+            font-weight: bold;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 1.2rem;
         }
 
-        #mensaje { 
-            margin-top: 20px; 
-            color: white; 
-            font-weight: 500; 
-            min-height: 1.5em; 
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        /* Media query para pantallas muy pequeñas */
-        @media (max-height: 600px) {
-            .casino-container { padding: 1.2rem; }
-            .puntos-display { font-size: 1.8rem; margin-bottom: 10px; }
-            input { margin-bottom: 10px; padding: 10px; }
-        }
-
-        p{
-         color:white;
-        }
+        #mensaje { margin-top: 15px; color: white; font-size: 0.9rem; min-height: 1.5em; }
     </style>
 </head>
 
 <body onload="brython()">
 
-<!-- Overlay de Felicidades -->
 <div id="celebracion-overlay">
     <p id="texto-felicidades" class="animate__animated">¡GRAN VICTORIA!</p>
 </div>
 
 <div class="casino-container animate__animated animate__fadeIn">
-    <h1 class="animate__animated animate__pulse animate__infinite shimmer">Onyx Casino</h1>
+    <h1 class="shimmer" style="margin:0; letter-spacing:3px;">ONYX CASINO</h1>
     
-    <div class="balance-label">Créditos Disponibles</div>
     <div class="puntos-display" id="puntos">1,000 <span>TOKEN</span></div>
+    <div class="intentos-badge" id="intentos-display">Intentos: 5 / 5</div>
+
+    <div id="timer-container">Próximo tiro en: <span id="countdown">10:00</span></div>
 
     <div class="input-group">
-        <label>TU APUESTA</label>
-        <input type="number" id="apuesta" value="100" min="1">
+        <label>APUESTA (Multiplica x8)</label>
+        <!-- inputmode="numeric" ayuda a que el teclado móvil sea el correcto -->
+        <input type="number" id="apuesta" value="100" min="1" inputmode="numeric">
         
-        <label>TU NÚMERO DE LA SUERTE (1 - 10)</label>
-        <input type="number" id="numero" placeholder="1-10" min="1" max="10">
+        <label>TU NÚMERO (1 - 10)</label>
+        <input type="number" id="numero" placeholder="?" min="1" max="10" inputmode="numeric">
         
         <button id="btn-jugar">Girar Ruleta</button>
-        <button id="btn-reiniciar">💸 Bancarrota: Reiniciar</button>
+        <button id="btn-extra">➕ Comprar Tiro Extra (10 Tokens)</button>
+        <button id="btn-reiniciar">💸 Reiniciar Juego</button>
     </div>
 
-<button id="btn-extra">Comprar intento (10 TOKEN)</button>
-<p id="intentos-info"></p>
-
-    <p id="mensaje">Apuesta y multiplica x10 🍀</p>
+    <p id="mensaje">¡Suerte, jugador! 🍀</p>
 </div>
 
 <script type="text/python">
 from browser import document, window, timer
-import random, json
+import random
+import time
 
-# -------------------------
-# CONFIGURACIÓN
-# -------------------------
-PAGO_MULTIPLICADOR = 8
-INTENTOS_MAXIMOS = 5
-COOLDOWN_MINUTOS = 10
-COSTO_INTENTO_EXTRA = 10
+puntos = 1000
+intentos = 5
+tiempo_espera = 600
+proximo_tiempo = 0
+reloj_activo = False
 
-# -------------------------
-# STORAGE
-# -------------------------
-def guardar_estado():
-    data = {
-        "puntos": puntos,
-        "intentos": intentos,
-        "cooldown": cooldown_timestamp
-    }
-    window.sessionStorage.setItem("onyx_data", json.dumps(data))
+def lanzar_fuegos():
+    for i in range(2):
+        window.confetti({'particleCount': 50, 'spread': 70, 'origin': {'y': 0.6}, 'colors': ['#d4af37', '#ffffff']})
 
-def cargar_estado():
-    global puntos, intentos, cooldown_timestamp
-    data = window.sessionStorage.getItem("onyx_data")
+def actualizar_ui(msg):
+    document['puntos'].html = f"{puntos:,} <span>TOKEN</span>"
+    document['mensaje'].text = msg
+    document['intentos-display'].text = f"Intentos: {intentos} / 5"
 
-    if data:
-        parsed = json.loads(data)
-        puntos = parsed.get("puntos", 1000)
-        intentos = parsed.get("intentos", INTENTOS_MAXIMOS)
-        cooldown_timestamp = parsed.get("cooldown", 0)
+def tick_reloj():
+    global intentos, reloj_activo
+    restante = int(proximo_tiempo - time.time())
+    
+    if restante <= 0:
+        intentos = 5
+        reloj_activo = False
+        document['timer-container'].style.display = "none"
+        document['btn-jugar'].disabled = False
+        document['btn-jugar'].style.opacity = "1"
+        actualizar_ui("¡Tiros recargados! 🍀")
     else:
-        puntos = 1000
-        intentos = INTENTOS_MAXIMOS
-        cooldown_timestamp = 0
-        guardar_estado()
+        mins = restante // 60
+        secs = restante % 60
+        document['countdown'].text = f"{mins:02d}:{secs:02d}"
+        timer.set_timeout(tick_reloj, 1000)
 
-# -------------------------
-# UI
-# -------------------------
-def actualizar_ui(msg=""):
-    document["puntos"].html = f"{puntos:,} <span>TOKEN</span>"
-    document["mensaje"].text = msg
-    document["intentos-info"].text = f"Intentos disponibles: {intentos}"
+def iniciar_espera():
+    global proximo_tiempo, reloj_activo
+    proximo_tiempo = time.time() + tiempo_espera
+    document['timer-container'].style.display = "block"
+    document['btn-jugar'].disabled = True
+    document['btn-jugar'].style.opacity = "0.5"
+    if not reloj_activo:
+        reloj_activo = True
+        tick_reloj()
 
-def mostrar_gran_victoria():
-    overlay = document['celebracion-overlay']
-    texto = document['texto-felicidades']
-    overlay.style.display = "flex"
-    texto.classList.add('animate__zoomInDown')
-
-    window.confetti({'particleCount': 150})
-    timer.set_timeout(lambda: overlay.style.__setitem__("display", "none"), 3000)
-
-# -------------------------
-# SISTEMA DE INTENTOS
-# -------------------------
-def verificar_cooldown():
-    global intentos, cooldown_timestamp
-    ahora = window.Date.now()
-
-    if intentos <= 0 and ahora >= cooldown_timestamp:
-        intentos = INTENTOS_MAXIMOS
-        cooldown_timestamp = 0
-        guardar_estado()
-        actualizar_ui("🎉 Intentos recargados")
-
-def usar_intento():
-    global intentos, cooldown_timestamp
-    intentos -= 1
-
-    if intentos <= 0:
-        cooldown_timestamp = window.Date.now() + (COOLDOWN_MINUTOS * 60 * 1000)
-
-# -------------------------
-# JUEGO
-# -------------------------
 def jugar(ev):
-    global puntos
-
-    verificar_cooldown()
-
-    if intentos <= 0:
-        actualizar_ui("⏳ Sin intentos. Espera recarga o compra uno.")
+    global puntos, intentos
+    
+    # Si el botón está deshabilitado, no hacer nada
+    if document['btn-jugar'].disabled or intentos <= 0:
         return
 
     try:
-        val_apuesta = int(document["apuesta"].value)
-        val_numero = int(document["numero"].value)
+        val_apuesta = int(document['apuesta'].value)
+        val_numero = int(document['numero'].value)
     except:
-        actualizar_ui("⚠️ Ingresa números válidos")
-        return
-
-    if val_apuesta <= 0:
-        actualizar_ui("⚠️ Apuesta mínima: 1 TOKEN")
+        actualizar_ui("⚠️ Datos inválidos")
         return
 
     if val_apuesta > puntos:
-        actualizar_ui("🚫 Créditos insuficientes")
+        actualizar_ui("🚫 No tienes suficientes tokens")
         return
-
+    
     if not (1 <= val_numero <= 10):
         actualizar_ui("🔢 Elige del 1 al 10")
         return
 
+    intentos -= 1
     numero_secreto = random.randint(1, 10)
-
-    usar_intento()
-
+    
     if val_numero == numero_secreto:
-        ganancia = val_apuesta * PAGO_MULTIPLICADOR
+        ganancia = val_apuesta * 8
         puntos += (ganancia - val_apuesta)
-        actualizar_ui(f"🔥 ¡GANASTE! Salió el {numero_secreto}")
-        mostrar_gran_victoria()
+        actualizar_ui(f"🔥 ¡GANASTE! Salió el {numero_secreto} (x8)")
+        document['celebracion-overlay'].style.display = "flex"
+        lanzar_fuegos()
+        timer.set_timeout(lambda: setattr(document['celebracion-overlay'].style, 'display', 'none'), 3000)
     else:
         puntos -= val_apuesta
-        actualizar_ui(f"❌ Era el {numero_secreto}")
+        actualizar_ui(f"❌ Fallaste. Salió el {numero_secreto}")
 
-    guardar_estado()
-    actualizar_ui()
+    if puntos <= 0:
+        puntos = 0
+        document['btn-jugar'].style.display = "none"
+        document['btn-reiniciar'].style.display = "block"
+        actualizar_ui("💀 BANCARROTA")
+    elif intentos <= 0:
+        iniciar_espera()
 
-# -------------------------
-# COMPRAR INTENTO
-# -------------------------
-def comprar_intento(ev):
+def comprar_tiro(ev):
     global puntos, intentos
+    if puntos >= 10:
+        puntos -= 10
+        intentos += 1
+        document['timer-container'].style.display = "none"
+        document['btn-jugar'].disabled = False
+        document['btn-jugar'].style.opacity = "1"
+        actualizar_ui("➕ Tiro extra comprado por 10 tokens")
+    else:
+        actualizar_ui("⚠️ Necesitas 10 tokens para un tiro extra")
 
-    if puntos < COSTO_INTENTO_EXTRA:
-        actualizar_ui("🚫 No tienes tokens suficientes")
-        return
+def reiniciar(ev):
+    global puntos, intentos, reloj_activo
+    puntos = 1000
+    intentos = 5
+    reloj_activo = False
+    document['btn-jugar'].style.display = "block"
+    document['btn-reiniciar'].style.display = "none"
+    document['timer-container'].style.display = "none"
+    document['btn-jugar'].disabled = False
+    document['btn-jugar'].style.opacity = "1"
+    actualizar_ui("¡Mesa reiniciada! 🍀")
 
-    puntos -= COSTO_INTENTO_EXTRA
-    intentos += 1
-    guardar_estado()
-    actualizar_ui("🎟 Intento extra comprado")
+# NUEVA LÓGICA PARA ENTER / SIGUIENTE
+def verificar_tecla(ev):
+    if ev.keyCode == 13: # Código 13 es Enter / Go / Done
+        jugar(None)
 
-# -------------------------
-# INICIALIZAR
-# -------------------------
-def iniciar():
-    cargar_estado()
-    actualizar_ui("🎰 Listo para jugar")
+# Binds de eventos
+document['btn-jugar'].bind('click', jugar)
+document['btn-extra'].bind('click', comprar_tiro)
+document['btn-reiniciar'].bind('click', reiniciar)
 
-# -------------------------
-# EVENTOS
-# -------------------------
-document["btn-jugar"].bind("click", jugar)
-document["btn-extra"].bind("click", comprar_intento)
+# Vincular la tecla Enter en ambos campos
+document['apuesta'].bind('keydown', verificar_tecla)
+document['numero'].bind('keydown', verificar_tecla)
 
-iniciar()
 </script>
 </body>
 </html>
