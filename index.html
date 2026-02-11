@@ -9,15 +9,18 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
     
-    <!-- Animate.css para animaciones rápidas -->
+    <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
             --onyx: #0f0f0f;
             --gold: #d4af37;
             --gold-light: #f1d592;
-            --glass: rgba(15, 15, 15, 0.85);
+            --glass: rgba(15, 15, 15, 0.9);
             --danger: #ff4b2b;
             --success: #00ff87;
         }
@@ -25,71 +28,113 @@
         body {
             font-family: 'Poppins', 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 0;
-            height: 100vh;
+            padding: 20px 0; /* Espacio para scroll en móviles */
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Imagen de fondo de casino elegante */
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
                         url('https://www.geckohospitality.com/wp-content/uploads/bb-plugin/cache/AdobeStock_286434477-min-scaled-1-landscape-13387ac792414002953756e5cc6f21f7-jp57odsbkte9.jpeg');
             background-size: cover;
             background-position: center;
-            overflow: hidden;
+            background-attachment: fixed;
+            box-sizing: border-box;
         }
 
+        /* CAPA DE VICTORIA GIGANTE */
+        #celebracion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        #texto-felicidades {
+            color: var(--gold);
+            font-size: clamp(2.5rem, 12vw, 6rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* CONTENEDOR PRINCIPAL - AJUSTE RESPONSIVO */
         .casino-container {
             background: var(--glass);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 24px;
-            padding: 2.5rem;
+            padding: 2rem;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            animation: fadeInDown 1s ease-out;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            position: relative;
+            z-index: 10;
+            margin: auto;
         }
 
         h1 {
             color: var(--gold);
-            font-size: 2.2rem;
+            font-size: clamp(1.5rem, 8vw, 2.2rem);
             margin: 0 0 0.5rem 0;
             text-transform: uppercase;
             letter-spacing: 4px;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
 
-        .balance-label { color: #aaa; font-size: 0.8rem; text-transform: uppercase; margin-top: 10px; }
+        .shimmer {
+            background: linear-gradient(90deg, #d4af37, #f1d592, #d4af37);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .balance-label { color: #aaa; font-size: 0.75rem; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;}
         
         .puntos-display {
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             color: white;
             font-weight: 800;
             margin-bottom: 20px;
         }
-        .puntos-display span { color: var(--gold); }
+        .puntos-display span { color: var(--gold); font-size: 0.9rem; margin-left: 5px; }
 
         .input-group {
             background: rgba(255,255,255,0.05);
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        label { display: block; color: var(--gold-light); font-size: 0.75rem; margin-bottom: 8px; text-align: left; font-weight: bold;}
+        label { display: block; color: var(--gold-light); font-size: 0.7rem; margin-bottom: 8px; text-align: center; font-weight: bold; opacity: 0.8;}
 
+        /* NÚMEROS CENTRADOS EN INPUTS */
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: #000;
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--gold-light);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             margin-bottom: 15px;
             box-sizing: border-box;
-            transition: all 0.3s;
+            text-align: center; /* Centro los números aquí */
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
 
         input:focus {
@@ -100,29 +145,24 @@
 
         button {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             border: none;
-            font-weight: bold;
+            font-weight: 800;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             transition: all 0.3s;
+            font-size: 1rem;
         }
-
-        p{
-            color: white;
-        } 
 
         #btn-jugar {
             background: linear-gradient(45deg, #d4af37, #f1d592);
             color: #000;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
-        #btn-jugar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
-        }
+        #btn-jugar:active { transform: scale(0.98); }
 
         #btn-reiniciar {
             background: var(--danger);
@@ -131,148 +171,156 @@
             display: none;
         }
 
-        #mensaje {
-            margin-top: 20px;
-            font-weight: 500;
-            font-size: 1rem;
-            min-height: 1.5em;
+        #mensaje { 
+            margin-top: 20px; 
+            color: white; 
+            font-weight: 500; 
+            min-height: 1.5em; 
+            font-size: 0.95rem;
+            line-height: 1.4;
         }
 
-        /* Animación personalizada de vibración */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .shake { animation: shake 0.3s ease-in-out; }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .casino-container { padding: 1.5rem; }
-            h1 { font-size: 1.8rem; }
-            .puntos-display { font-size: 2rem; }
+        /* Media query para pantallas muy pequeñas */
+        @media (max-height: 600px) {
+            .casino-container { padding: 1.2rem; }
+            .puntos-display { font-size: 1.8rem; margin-bottom: 10px; }
+            input { margin-bottom: 10px; padding: 10px; }
         }
     </style>
 </head>
 
 <body onload="brython()">
 
-<div class="casino-container animate__animated animate__fadeInDown">
-    <h1>Onyx Casino</h1>
+<!-- Overlay de Felicidades -->
+<div id="celebracion-overlay">
+    <p id="texto-felicidades" class="animate__animated">¡GRAN VICTORIA!</p>
+</div>
+
+<div class="casino-container animate__animated animate__fadeIn">
+    <h1 class="animate__animated animate__pulse animate__infinite shimmer">Onyx Casino</h1>
+    
     <div class="balance-label">Créditos Disponibles</div>
-    <div class="puntos-display" id="puntos"><span>$</span>10,000</div>
+    <div class="puntos-display" id="puntos">1,000 <span>TOKEN</span></div>
 
     <div class="input-group">
-        <label>TU APUESTA ($)</label>
-        <input type="number" id="apuesta" value="500" min="1">
+        <label>TU APUESTA</label>
+        <input type="number" id="apuesta" value="100" min="1">
         
-        <label>ADIVINA EL NÚMERO (1 - 100)</label>
-        <input type="number" id="numero" placeholder="?" min="1" max="100">
+        <label>TU NÚMERO DE LA SUERTE (1 - 10)</label>
+        <input type="number" id="numero" placeholder="1-10" min="1" max="10">
         
-        <button id="btn-jugar">Realizar Apuesta</button>
-        <button id="btn-reiniciar">Bancarrota: Reiniciar</button>
+        <button id="btn-jugar">Girar Ruleta</button>
+        <button id="btn-reiniciar">💸 Bancarrota: Reiniciar</button>
     </div>
 
-    <p id="mensaje">Bienvenidos a la mesa de honor.</p>
+    <p id="mensaje">Apuesta y multiplica x10 🍀</p>
 </div>
 
 <script type="text/python">
-from browser import document, html, timer
+from browser import document, window, timer
 import random
 
-puntos = 10000
-numero_secreto = random.randint(1, 100)
+puntos = 1000
 
-def animar_mensaje(tipo):
-    # Añadir clase de animación de animate.css
-    document['mensaje'].classList.remove('animate__animated', 'animate__headShake', 'animate__bounceIn')
+def lanzar_fuegos_artificiales():
+    duration = 3 * 1000
+    end = window.Date.now() + duration
+
+    def frame():
+        window.confetti({
+            'particleCount': 7,
+            'angle': 60,
+            'spread': 55,
+            'origin': { 'x': 0 },
+            'colors': ['#d4af37', '#ffffff', '#f1d592']
+        })
+        window.confetti({
+            'particleCount': 7,
+            'angle': 120,
+            'spread': 55,
+            'origin': { 'x': 1 },
+            'colors': ['#d4af37', '#ffffff', '#f1d592']
+        })
+
+        if window.Date.now() < end:
+            window.requestAnimationFrame(lambda x: frame())
+
+    frame()
+
+def ocultar_felicidades():
+    document['celebracion-overlay'].style.display = "none"
+    document['texto-felicidades'].classList.remove('animate__zoomInDown')
+
+def mostrar_gran_victoria():
+    overlay = document['celebracion-overlay']
+    texto = document['texto-felicidades']
     
-    if tipo == "win":
-        document['mensaje'].classList.add('animate__animated', 'animate__bounceIn')
-        document['mensaje'].style.color = "#00ff87"
-    elif tipo == "error":
-        document['mensaje'].classList.add('animate__animated', 'animate__headShake')
-        document['mensaje'].style.color = "#ff4b2b"
-    else:
-        document['mensaje'].style.color = "white"
+    overlay.style.display = "flex"
+    texto.classList.add('animate__zoomInDown')
+    
+    lanzar_fuegos_artificiales()
+    timer.set_timeout(ocultar_felicidades, 4000)
 
 def actualizar_ui(msg):
-    document['puntos'].html = f"<span>$</span>{puntos:,}"
+    document['puntos'].html = f"{puntos:,} <span>TOKEN</span>"
     document['mensaje'].text = msg
 
 def jugar(ev):
-    global puntos, numero_secreto
-    
-    # Reset de clases de animación
-    document['mensaje'].classList.remove('animate__animated', 'animate__headShake', 'animate__bounceIn')
+    global puntos
+    if document['btn-jugar'].style.display == "none":
+        return
+
+    numero_secreto = random.randint(1, 10)
     
     try:
         val_apuesta = int(document['apuesta'].value)
         val_numero = int(document['numero'].value)
-    except ValueError:
-        actualizar_ui("⚠️ Ingrese valores válidos.")
-        animar_mensaje("error")
+    except:
+        actualizar_ui("⚠️ Ingresa números válidos")
         return
 
-    # Validaciones
     if val_apuesta > puntos:
-        actualizar_ui("❌ Créditos insuficientes.")
-        animar_mensaje("error")
+        actualizar_ui("🚫 Créditos insuficientes")
         return
     
     if val_apuesta <= 0:
-        actualizar_ui("⚠️ La apuesta mínima es de $1.")
-        animar_mensaje("error")
+        actualizar_ui("⚠️ Apuesta mínima: 1 TOKEN")
         return
 
-    if not (1 <= val_numero <= 100):
-        actualizar_ui("⚠️ El número debe estar entre 1 y 100.")
-        animar_mensaje("error")
+    if not (1 <= val_numero <= 10):
+        actualizar_ui("🔢 Elige del 1 al 10")
         return
 
-    # Lógica del juego
     if val_numero == numero_secreto:
         ganancia = val_apuesta * 10
-        puntos += ganancia
-        actualizar_ui(f"¡Felicitaciones! 🎉 El {numero_secreto} era correcto. Ganaste ${ganancia:,}")
-        animar_mensaje("win")
-        numero_secreto = random.randint(1, 100)
+        puntos += (ganancia - val_apuesta)
+        actualizar_ui(f"🔥 ¡INCREÍBLE! Salió el {numero_secreto} 💰")
+        mostrar_gran_victoria()
     else:
         puntos -= val_apuesta
-        pista = "MÁS ALTO 📈" if val_numero < numero_secreto else "MÁS BAJO 📉"
-        actualizar_ui(f"PERDISTE ${val_apuesta:,}. Pista: {pista}")
-        animar_mensaje("lose")
-
-    # Bancarrota
+        actualizar_ui(f"❌ PERDISTE. Era el {numero_secreto} 💸")
+        
     if puntos <= 0:
         puntos = 0
-        actualizar_ui("💸 BANCARROTA. Has perdido todo.")
+        actualizar_ui("💀 BANCARROTA. 💀")
         document['btn-jugar'].style.display = "none"
         document['btn-reiniciar'].style.display = "block"
 
-    document['numero'].value = ""
-    document['numero'].focus()
-
 def reiniciar(ev):
-    global puntos, numero_secreto
-    puntos = 10000
-    numero_secreto = random.randint(1, 100)
+    global puntos
+    puntos = 1000
     document['btn-jugar'].style.display = "block"
     document['btn-reiniciar'].style.display = "none"
-    actualizar_ui("Créditos restablecidos. ¡Suerte!")
-    animar_mensaje("neutral")
+    actualizar_ui("Nueva mesa lista. ¡Suerte! 🍀")
 
-# Eventos
+def verificar_tecla(ev):
+    if ev.key == "Enter":
+        jugar(ev)
+
 document['btn-jugar'].bind('click', jugar)
 document['btn-reiniciar'].bind('click', reiniciar)
-
-def check_enter(ev):
-    if ev.keyCode == 13:
-        jugar(None)
-document['numero'].bind('keydown', check_enter)
-
-print("Onyx Casino Engine Ready.")
+document['numero'].bind('keydown', verificar_tecla)
+document['apuesta'].bind('keydown', verificar_tecla)
 </script>
-
 </body>
 </html>
