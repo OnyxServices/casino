@@ -232,7 +232,7 @@ def jugar(ev):
 
     # Lógica del juego
     if val_numero == numero_secreto:
-        ganancia = val_apuesta * 3
+        ganancia = val_apuesta * 10
         puntos += ganancia
         actualizar_ui(f"¡Felicitaciones! 🎉 El {numero_secreto} era correcto. Ganaste ${ganancia:,}")
         animar_mensaje("win")
