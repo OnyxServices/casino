@@ -213,114 +213,163 @@
         <button id="btn-reiniciar">💸 Bancarrota: Reiniciar</button>
     </div>
 
+<button id="btn-extra">Comprar intento (10 TOKEN)</button>
+<p id="intentos-info"></p>
+
     <p id="mensaje">Apuesta y multiplica x10 🍀</p>
 </div>
 
 <script type="text/python">
 from browser import document, window, timer
-import random
+import random, json
 
-puntos = 1000
+# -------------------------
+# CONFIGURACIÓN
+# -------------------------
+PAGO_MULTIPLICADOR = 8
+INTENTOS_MAXIMOS = 5
+COOLDOWN_MINUTOS = 10
+COSTO_INTENTO_EXTRA = 10
 
-def lanzar_fuegos_artificiales():
-    duration = 3 * 1000
-    end = window.Date.now() + duration
+# -------------------------
+# STORAGE
+# -------------------------
+def guardar_estado():
+    data = {
+        "puntos": puntos,
+        "intentos": intentos,
+        "cooldown": cooldown_timestamp
+    }
+    window.sessionStorage.setItem("onyx_data", json.dumps(data))
 
-    def frame():
-        window.confetti({
-            'particleCount': 7,
-            'angle': 60,
-            'spread': 55,
-            'origin': { 'x': 0 },
-            'colors': ['#d4af37', '#ffffff', '#f1d592']
-        })
-        window.confetti({
-            'particleCount': 7,
-            'angle': 120,
-            'spread': 55,
-            'origin': { 'x': 1 },
-            'colors': ['#d4af37', '#ffffff', '#f1d592']
-        })
+def cargar_estado():
+    global puntos, intentos, cooldown_timestamp
+    data = window.sessionStorage.getItem("onyx_data")
 
-        if window.Date.now() < end:
-            window.requestAnimationFrame(lambda x: frame())
+    if data:
+        parsed = json.loads(data)
+        puntos = parsed.get("puntos", 1000)
+        intentos = parsed.get("intentos", INTENTOS_MAXIMOS)
+        cooldown_timestamp = parsed.get("cooldown", 0)
+    else:
+        puntos = 1000
+        intentos = INTENTOS_MAXIMOS
+        cooldown_timestamp = 0
+        guardar_estado()
 
-    frame()
-
-def ocultar_felicidades():
-    document['celebracion-overlay'].style.display = "none"
-    document['texto-felicidades'].classList.remove('animate__zoomInDown')
+# -------------------------
+# UI
+# -------------------------
+def actualizar_ui(msg=""):
+    document["puntos"].html = f"{puntos:,} <span>TOKEN</span>"
+    document["mensaje"].text = msg
+    document["intentos-info"].text = f"Intentos disponibles: {intentos}"
 
 def mostrar_gran_victoria():
     overlay = document['celebracion-overlay']
     texto = document['texto-felicidades']
-    
     overlay.style.display = "flex"
     texto.classList.add('animate__zoomInDown')
-    
-    lanzar_fuegos_artificiales()
-    timer.set_timeout(ocultar_felicidades, 4000)
 
-def actualizar_ui(msg):
-    document['puntos'].html = f"{puntos:,} <span>TOKEN</span>"
-    document['mensaje'].text = msg
+    window.confetti({'particleCount': 150})
+    timer.set_timeout(lambda: overlay.style.__setitem__("display", "none"), 3000)
 
+# -------------------------
+# SISTEMA DE INTENTOS
+# -------------------------
+def verificar_cooldown():
+    global intentos, cooldown_timestamp
+    ahora = window.Date.now()
+
+    if intentos <= 0 and ahora >= cooldown_timestamp:
+        intentos = INTENTOS_MAXIMOS
+        cooldown_timestamp = 0
+        guardar_estado()
+        actualizar_ui("🎉 Intentos recargados")
+
+def usar_intento():
+    global intentos, cooldown_timestamp
+    intentos -= 1
+
+    if intentos <= 0:
+        cooldown_timestamp = window.Date.now() + (COOLDOWN_MINUTOS * 60 * 1000)
+
+# -------------------------
+# JUEGO
+# -------------------------
 def jugar(ev):
     global puntos
-    if document['btn-jugar'].style.display == "none":
+
+    verificar_cooldown()
+
+    if intentos <= 0:
+        actualizar_ui("⏳ Sin intentos. Espera recarga o compra uno.")
         return
 
-    numero_secreto = random.randint(1, 10)
-    
     try:
-        val_apuesta = int(document['apuesta'].value)
-        val_numero = int(document['numero'].value)
+        val_apuesta = int(document["apuesta"].value)
+        val_numero = int(document["numero"].value)
     except:
         actualizar_ui("⚠️ Ingresa números válidos")
         return
 
-    if val_apuesta > puntos:
-        actualizar_ui("🚫 Créditos insuficientes")
-        return
-    
     if val_apuesta <= 0:
         actualizar_ui("⚠️ Apuesta mínima: 1 TOKEN")
+        return
+
+    if val_apuesta > puntos:
+        actualizar_ui("🚫 Créditos insuficientes")
         return
 
     if not (1 <= val_numero <= 10):
         actualizar_ui("🔢 Elige del 1 al 10")
         return
 
+    numero_secreto = random.randint(1, 10)
+
+    usar_intento()
+
     if val_numero == numero_secreto:
-        ganancia = val_apuesta * 10
+        ganancia = val_apuesta * PAGO_MULTIPLICADOR
         puntos += (ganancia - val_apuesta)
-        actualizar_ui(f"🔥 ¡INCREÍBLE! Salió el {numero_secreto} 💰")
+        actualizar_ui(f"🔥 ¡GANASTE! Salió el {numero_secreto}")
         mostrar_gran_victoria()
     else:
         puntos -= val_apuesta
-        actualizar_ui(f"❌ PERDISTE. Era el {numero_secreto} 💸")
-        
-    if puntos <= 0:
-        puntos = 0
-        actualizar_ui("💀 BANCARROTA. 💀")
-        document['btn-jugar'].style.display = "none"
-        document['btn-reiniciar'].style.display = "block"
+        actualizar_ui(f"❌ Era el {numero_secreto}")
 
-def reiniciar(ev):
-    global puntos
-    puntos = 1000
-    document['btn-jugar'].style.display = "block"
-    document['btn-reiniciar'].style.display = "none"
-    actualizar_ui("Nueva mesa lista. ¡Suerte! 🍀")
+    guardar_estado()
+    actualizar_ui()
 
-def verificar_tecla(ev):
-    if ev.key == "Enter":
-        jugar(ev)
+# -------------------------
+# COMPRAR INTENTO
+# -------------------------
+def comprar_intento(ev):
+    global puntos, intentos
 
-document['btn-jugar'].bind('click', jugar)
-document['btn-reiniciar'].bind('click', reiniciar)
-document['numero'].bind('keydown', verificar_tecla)
-document['apuesta'].bind('keydown', verificar_tecla)
+    if puntos < COSTO_INTENTO_EXTRA:
+        actualizar_ui("🚫 No tienes tokens suficientes")
+        return
+
+    puntos -= COSTO_INTENTO_EXTRA
+    intentos += 1
+    guardar_estado()
+    actualizar_ui("🎟 Intento extra comprado")
+
+# -------------------------
+# INICIALIZAR
+# -------------------------
+def iniciar():
+    cargar_estado()
+    actualizar_ui("🎰 Listo para jugar")
+
+# -------------------------
+# EVENTOS
+# -------------------------
+document["btn-jugar"].bind("click", jugar)
+document["btn-extra"].bind("click", comprar_intento)
+
+iniciar()
 </script>
 </body>
 </html>
