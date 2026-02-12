@@ -195,7 +195,6 @@
 
     <p id="mensaje">¡Haz tu apuesta!</p>
 </div>
-
 <script type="text/python">
 from browser import document, window, timer, html
 import random
@@ -215,7 +214,7 @@ girando = False
 
 def render_carrete(pos_y, velocidad=0):
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    
+
     # 1. Fondo con efecto cilindro
     grad_fondo = ctx.createLinearGradient(0, 0, 0, canvas.height)
     grad_fondo.addColorStop(0, "#000000")
@@ -226,22 +225,26 @@ def render_carrete(pos_y, velocidad=0):
 
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
-    
+
     # Motion Blur: Determinar cuántas sombras dibujar
     pasos_blur = 1
     if abs(velocidad) > 30: pasos_blur = 3
-    
-    for i in range(-3, 24):
-        # Calcular posición base con loop infinito
-        base_y = (i * altura_item) + (pos_y % (len(numeros_carrete) * altura_item))
-        num = numeros_carrete[i % len(numeros_carrete)]
-        
+
+    centro_c = canvas.height / 2
+    total_items = len(numeros_carrete)
+
+    # Dibujar un número suficiente de elementos arriba/abajo para simular loop infinito.
+    for i in range(-5, total_items + 5):
+        # Usar pos_y directamente (no modulo) para mantener coherencia en el centrado final
+        base_y = (i * altura_item) + pos_y
+        num = numeros_carrete[i % total_items]
+
+        # Evitar dibujar elementos fuera del área visible
+        if base_y < -altura_item or base_y > canvas.height + altura_item:
+            continue
+
         # Efecto de curvatura 3D
-        centro_c = canvas.height / 2
         dist_centro = abs((base_y + altura_item/2) - centro_c)
-        
-        # Optimizar: No dibujar si está muy lejos
-        if base_y < -altura_item or base_y > canvas.height + altura_item: continue
 
         # Escala y Opacidad según distancia al centro
         escala = max(0.4, 1.1 - (dist_centro / centro_c))
@@ -249,9 +252,9 @@ def render_carrete(pos_y, velocidad=0):
 
         # Dibujar con Motion Blur
         for b in range(pasos_blur):
-            y_blur = base_y + (b * velocidad * 0.15)
-            
-            if dist_centro < 35: # Elemento seleccionado
+            y_blur = base_y + (b * velocidad * 0.015)  # menor desplazamiento por frame para más suavidad
+
+            if dist_centro < (altura_item / 2): # Elemento seleccionado (umbral: mitad del item)
                 ctx.fillStyle = f"rgba(241, 213, 146, {opacidad})"
                 ctx.font = f"bold {int(55 * escala)}px 'Trebuchet MS'"
                 ctx.shadowBlur = 15
@@ -262,7 +265,7 @@ def render_carrete(pos_y, velocidad=0):
                 ctx.shadowBlur = 0
 
             ctx.fillText(str(num), canvas.width/2, y_blur + altura_item/2)
-            ctx.shadowBlur = 0 # Reset para el siguiente
+            ctx.shadowBlur = 0
 
     # 2. Sombras de bordes (Overlay)
     grad_over = ctx.createLinearGradient(0, 0, 0, canvas.height)
@@ -277,29 +280,31 @@ def animar_giro(objetivo_idx, duracion, inicio_time, inicio_offset):
     global offset_y, girando
     ahora = time.time()
     progreso = (ahora - inicio_time) / duracion
-    
+
     if progreso >= 1:
-        # Final exacto
-        offset_y = -(objetivo_idx * altura_item) + (canvas.height/2 - altura_item/2)
+        # Final exacto: alinear el índice objetivo al centro
+        offset_y = (canvas.height/2 - altura_item/2) - (objetivo_idx * altura_item)
         render_carrete(offset_y, 0)
         girando = False
-        finalizar_juego(numeros_carrete[objetivo_idx])
+        # Llamamos a finalizar después de un pequeño retardo para asegurar render y UX (50ms)
+        timer.set_timeout(lambda: finalizar_juego(numeros_carrete[objetivo_idx]), 50)
         return
 
-    # Easing: "Back Out" (Rebote mecánico)
-    # Fórmula: 1 - (1-x)^3 * (1 - x * (s * (1-x) - s))
-    s = 1.2 # Intensidad del rebote
+    # Easing: "Back Out" (rebote mecánico)
+    s = 1.2
     p_inv = 1 - progreso
     p = 1 - (p_inv**3 * (1 - progreso * (s * p_inv - s)))
-    
+
     vueltas = 10
     distancia_total = (len(numeros_carrete) * vueltas * altura_item)
     actual_pos = inicio_offset - (distancia_total * p)
-    
-    # Velocidad para el desenfoque
-    velocidad = (distancia_total / duracion) * (1 - progreso) * 1.5
-    
+
+    # Velocidad para el desenfoque (ajustada)
+    velocidad = (distancia_total / duracion) * (1 - progreso) * 0.9
+
+    offset_y = actual_pos
     render_carrete(actual_pos, velocidad)
+    # requestAnimationFrame -> continuar animación
     window.requestAnimationFrame(lambda t: animar_giro(objetivo_idx, duracion, inicio_time, inicio_offset))
 
 def actualizar_ui():
@@ -310,10 +315,10 @@ def cambiar_tipo(ev):
     global tipo_apuesta
     for b in ['bet-exacto', 'bet-paridad', 'bet-rango']:
         document[b].classList.remove('active')
-    
+
     ev.target.classList.add('active')
     tipo_apuesta = ev.target.id.split('-')[1]
-    
+
     select = document['sub-opcion']
     select.html = ""
     if tipo_apuesta == "exacto":
@@ -326,9 +331,9 @@ def cambiar_tipo(ev):
         select <= html.OPTION("ALTO (11-20)", value="alto")
 
 def iniciar_giro(ev):
-    global puntos, intentos, girando
+    global puntos, intentos, girando, offset_y
     if girando or intentos <= 0: return
-    
+
     try:
         monto = int(document['monto-apuesta'].value)
     except:
@@ -342,14 +347,18 @@ def iniciar_giro(ev):
     girando = True
     actualizar_ui()
     document['mensaje'].text = "🎰 Girando carrete..."
-    
-    ganador_idx = random.randint(0, 19)
+
+    ganador_idx = random.randint(0, len(numeros_carrete)-1)
+    # pasar el offset actual para continuidad en la animación
     animar_giro(ganador_idx, 3.5, time.time(), offset_y)
 
 def finalizar_juego(resultado):
     global puntos
     sub_val = document['sub-opcion'].value
-    monto = int(document['monto-apuesta'].value)
+    try:
+        monto = int(document['monto-apuesta'].value)
+    except:
+        monto = 0
     gana = False
     premio = 0
 
@@ -386,8 +395,10 @@ def comprar_carga(ev):
         document['mensaje'].text = "⚠️ Necesitas 20 tokens"
 
 def reiniciar(ev):
-    global puntos, intentos
+    global puntos, intentos, offset_y, girando
     puntos, intentos = 1000, 5
+    offset_y = 0
+    girando = False
     document['btn-girar'].style.display = "block"
     document['btn-reiniciar'].style.display = "none"
     actualizar_ui()
