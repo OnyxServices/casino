@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onyx Casino | Realismo Pro</title>
+    <title>Onyx Casino | House Edge Edition</title>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
@@ -12,408 +12,425 @@
 
     <style>
         :root {
-            --onyx: #0f0f0f;
+            --onyx: #050505;
             --gold: #d4af37;
             --gold-light: #f1d592;
-            --glass: rgba(15, 15, 15, 0.95);
-            --danger: #ff4b2b;
+            --glass: rgba(20, 20, 20, 0.98);
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            background: #050505;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .casino-container {
-            width: 95%;
-            max-width: 420px;
+            width: 90%;
+            max-width: 400px;
             background: var(--glass);
-            border: 1px solid var(--gold);
-            border-radius: 28px;
-            padding: 1.5rem;
+            border: 2px solid #222;
+            border-top: 2px solid var(--gold);
+            border-radius: 30px;
+            padding: 2rem;
             text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.1);
         }
 
-        /* --- CARRETE REALISTA --- */
+        /* --- CARRETE ULTRA REALISTA --- */
+        #canvas-wrapper {
+            position: relative;
+            margin: 25px auto;
+            width: 160px;
+            height: 240px;
+            border-radius: 20px;
+            background: #080808;
+            padding: 10px;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 20px #000;
+        }
+
         #canvas-container {
             position: relative;
-            margin: 20px auto;
-            width: 140px;
-            height: 220px;
-            border: 4px solid var(--gold);
-            border-radius: 15px;
-            background: #000;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 
-                inset 0 25px 40px rgba(0,0,0,1), 
-                inset 0 -25px 40px rgba(0,0,0,1),
-                0 0 20px rgba(212, 175, 55, 0.3);
+            background: #050505;
+            border: 1px solid #1a1a1a;
         }
 
-        /* Reflejo de cristal superior */
         #canvas-container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.05) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%);
             pointer-events: none;
             z-index: 5;
         }
 
-        /* Marcador de selección (Rojo/Oro) */
-        #canvas-container::after {
-            content: "";
+        .overlay-shadow {
             position: absolute;
-            top: 50%;
-            left: -5px;
-            right: -5px;
-            height: 4px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 15%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 85%, rgba(0,0,0,1) 100%);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .win-marker {
+            position: absolute;
+            top: 50%; left: 0; right: 0; height: 2px;
             background: var(--gold);
-            box-shadow: 0 0 15px var(--gold);
             transform: translateY(-50%);
             z-index: 10;
+            box-shadow: 0 0 10px var(--gold);
+            opacity: 0.7;
         }
 
-        canvas { display: block; }
+        canvas { display: block; image-rendering: -webkit-optimize-contrast; }
 
-        /* --- INTERFAZ --- */
-        .puntos-display { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
-        .puntos-display span { color: var(--gold); font-size: 1rem; }
+        /* --- UI --- */
+        .puntos-display { font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; }
+        .puntos-display span { font-size: 0.8rem; color: var(--gold); letter-spacing: 2px; }
         
         .intentos-badge {
-            background: rgba(212,175,55,0.1);
-            border: 1px solid var(--gold);
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--gold-light);
+            display: inline-block;
+            background: #111;
+            border: 1px solid #333;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 5px;
         }
 
-        .seccion-apuesta {
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            padding: 15px;
-            margin-top: 15px;
+        .btn-comprar {
+            display: block;
+            margin: 0 auto 15px auto;
+            background: none;
+            border: 1px solid #d4af3755;
+            color: var(--gold);
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
+        .btn-comprar:hover { background: #d4af3722; border-color: var(--gold); }
 
         .grid-opciones {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 12px 0;
+            gap: 10px;
+            margin: 15px 0;
         }
 
         input, select {
             width: 100%;
             padding: 12px;
             background: #000;
-            border: 1px solid #444;
-            border-radius: 10px;
-            color: var(--gold-light);
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: white;
             text-align: center;
-            box-sizing: border-box;
             font-size: 1rem;
+            transition: border 0.3s;
         }
 
-        button { cursor: pointer; transition: 0.2s; font-weight: bold; border: none; }
+        button { cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; }
 
         .btn-principal {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(45deg, #d4af37, #f1d592);
-            border-radius: 12px;
-            color: black;
+            padding: 18px;
+            background: linear-gradient(to bottom, #f1d592, #d4af37);
+            border-radius: 15px;
+            color: #000;
+            font-weight: 800;
             font-size: 1.1rem;
             text-transform: uppercase;
+            box-shadow: 0 4px 0 #927621;
         }
+        .btn-principal:active { transform: translateY(3px); box-shadow: 0 1px 0 #927621; }
 
         .btn-secundario {
-            background: rgba(255,255,255,0.05);
-            color: white;
-            border: 1px solid #333;
+            background: #151515;
+            color: #666;
+            border: 1px solid #222;
             padding: 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
         }
-
         .btn-secundario.active {
-            background: var(--gold);
-            color: black;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold);
             border-color: var(--gold);
         }
 
-        #btn-extra {
-            background: transparent;
-            color: var(--gold-light);
-            text-decoration: underline;
-            font-size: 0.8rem;
-            margin-top: 12px;
-            display: block;
-            width: 100%;
-        }
-
-        .label-mini { display: block; font-size: 0.65rem; color: #888; margin-bottom: 4px; text-transform: uppercase; }
-        #mensaje { margin-top: 15px; font-size: 0.95rem; font-weight: bold; color: var(--gold-light); }
+        #mensaje { min-height: 1.2rem; margin-top: 15px; font-weight: 600; color: var(--gold-light); }
+        .hint { font-size: 0.7rem; color: #444; margin-top: 10px; }
     </style>
 </head>
 
 <body onload="brython()">
 
 <div class="casino-container animate__animated animate__fadeIn">
-    <h2 style="margin:0; letter-spacing:4px; color:var(--gold);">ONYX REEL</h2>
+    <div class="intentos-badge" id="intentos-display">CARGAS: 5 / 5</div>
+    <button class="btn-comprar" id="btn-comprar-carga">+ COMPRAR CARGA (50 TOKENS)</button>
     
-    <div class="puntos-display" id="puntos">1,000 <span>TOKEN</span></div>
-    <div class="intentos-badge" id="intentos-display">Cargas: 5 / 5</div>
-
-    <div id="canvas-container">
-        <canvas id="ruleta" width="140" height="220"></canvas>
+    <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
+    
+    <div id="canvas-wrapper">
+        <div id="canvas-container">
+            <div class="overlay-shadow"></div>
+            <div class="win-marker"></div>
+            <canvas id="ruleta" width="140" height="220"></canvas>
+        </div>
     </div>
 
     <div class="seccion-apuesta">
-        <span class="label-mini">Monto de la Apuesta</span>
         <input type="number" id="monto-apuesta" value="100" min="10">
 
         <div class="grid-opciones">
-            <button class="btn-secundario active" id="bet-exacto">Número (x15)</button>
-            <button class="btn-secundario" id="bet-paridad">Paridad (x2)</button>
-            <button class="btn-secundario" id="bet-rango">Rango (x2)</button>
+            <button class="btn-secundario active" id="bet-exacto">NÚMERO (x18)</button>
+            <button class="btn-secundario" id="bet-paridad">PARIDAD (x1.9)</button>
+            <button class="btn-secundario" id="bet-rango">RANGO (x1.9)</button>
             <select id="sub-opcion"></select>
         </div>
 
-        <button class="btn-principal" id="btn-girar">Girar Carrete</button>
-        <button id="btn-extra">Comprar Carga (+1) por 20 Tokens</button>
-        <button class="btn-principal" id="btn-reiniciar" style="display:none; background: var(--danger); color:white;">Reiniciar Juego</button>
+        <button class="btn-principal" id="btn-girar">GIRAR (ENTER)</button>
+        <div class="hint">Presiona ENTER para jugar rápido</div>
+        <button class="btn-principal" id="btn-reiniciar" style="display:none; background: #ff4b2b; box-shadow: 0 4px 0 #a31d06; color:white;">REINICIAR</button>
     </div>
 
-    <p id="mensaje">¡Haz tu apuesta!</p>
+    <p id="mensaje">ELIGE TU DESTINO</p>
 </div>
+
 <script type="text/python">
 from browser import document, window, timer, html
 import random
 import time
 import math
 
-# Configuración
+# --- CONFIGURACIÓN ---
 puntos = 1000
 intentos = 5
 tipo_apuesta = "exacto"
-numeros_carrete = list(range(1, 21))
+
+# MODIFICACIÓN: Rango 0 a 20 para incluir el CERO (House Edge)
+numeros = list(range(0, 21)) 
+
 canvas = document["ruleta"]
 ctx = canvas.getContext("2d")
-altura_item = 70
-offset_y = 0
+RADIUS = 280 
+VISUAL_OFFSET = 0
 girando = False
 
-def render_carrete(pos_y, velocidad=0):
+def render_carrete(rotation_offset, blur_strength=0):
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    center_y = canvas.height / 2
+    for i in range(len(numeros)):
+        angle_step = (2 * math.pi) / len(numeros)
+        angle = (i * angle_step) + rotation_offset
+        cos_angle = math.cos(angle)
+        
+        # Ocultar números traseros
+        if cos_angle > 0:
+            y = center_y + RADIUS * math.sin(angle)
+            scale = 0.4 + (0.6 * cos_angle)
+            opacity = math.pow(cos_angle, 3) 
+            
+            if opacity < 0.05: continue
 
-    # 1. Fondo con efecto cilindro
-    grad_fondo = ctx.createLinearGradient(0, 0, 0, canvas.height)
-    grad_fondo.addColorStop(0, "#000000")
-    grad_fondo.addColorStop(0.5, "#111111")
-    grad_fondo.addColorStop(1, "#000000")
-    ctx.fillStyle = grad_fondo
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+            ctx.save()
+            ctx.globalAlpha = opacity
+            
+            steps = 1 if blur_strength < 5 else 3
+            for s in range(steps):
+                offset_blur = (s * blur_strength * 0.15)
+                es_ganador = abs(y - center_y) < 15
+                
+                # Color especial para el 0 (Verde estilo ruleta, o Dorado estándar)
+                num_actual = numeros[i]
+                if es_ganador:
+                    ctx.fillStyle = "#f1d592"
+                    ctx.font = f"bold {int(55 * scale)}px Arial Black"
+                else:
+                    ctx.fillStyle = "#ff4b4b" if num_actual == 0 else "white" # 0 en rojo sutil
+                    ctx.font = f"bold {int(45 * scale)}px Arial"
+                
+                ctx.textAlign = "center"
+                ctx.textBaseline = "middle"
+                ctx.fillText(str(num_actual), canvas.width/2, y + offset_blur)
+            ctx.restore()
 
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
+def animar(target_idx, duration, start_time, start_rotation):
+    global VISUAL_OFFSET, girando
+    now = time.time()
+    elapsed = now - start_time
+    progress = elapsed / duration
 
-    # Motion Blur: Determinar cuántas sombras dibujar
-    pasos_blur = 1
-    if abs(velocidad) > 30: pasos_blur = 3
-
-    centro_c = canvas.height / 2
-    total_items = len(numeros_carrete)
-
-    # Dibujar un número suficiente de elementos arriba/abajo para simular loop infinito.
-    for i in range(-5, total_items + 5):
-        # Usar pos_y directamente (no modulo) para mantener coherencia en el centrado final
-        base_y = (i * altura_item) + pos_y
-        num = numeros_carrete[i % total_items]
-
-        # Evitar dibujar elementos fuera del área visible
-        if base_y < -altura_item or base_y > canvas.height + altura_item:
-            continue
-
-        # Efecto de curvatura 3D
-        dist_centro = abs((base_y + altura_item/2) - centro_c)
-
-        # Escala y Opacidad según distancia al centro
-        escala = max(0.4, 1.1 - (dist_centro / centro_c))
-        opacidad = max(0.0, 1.0 - (dist_centro / centro_c))
-
-        # Dibujar con Motion Blur
-        for b in range(pasos_blur):
-            y_blur = base_y + (b * velocidad * 0.015)  # menor desplazamiento por frame para más suavidad
-
-            if dist_centro < (altura_item / 2): # Elemento seleccionado (umbral: mitad del item)
-                ctx.fillStyle = f"rgba(241, 213, 146, {opacidad})"
-                ctx.font = f"bold {int(55 * escala)}px 'Trebuchet MS'"
-                ctx.shadowBlur = 15
-                ctx.shadowColor = "#d4af37"
-            else: # Elementos secundarios
-                ctx.fillStyle = f"rgba(212, 175, 55, {opacidad * 0.4})"
-                ctx.font = f"bold {int(42 * escala)}px 'Trebuchet MS'"
-                ctx.shadowBlur = 0
-
-            ctx.fillText(str(num), canvas.width/2, y_blur + altura_item/2)
-            ctx.shadowBlur = 0
-
-    # 2. Sombras de bordes (Overlay)
-    grad_over = ctx.createLinearGradient(0, 0, 0, canvas.height)
-    grad_over.addColorStop(0, "rgba(0,0,0,0.9)")
-    grad_over.addColorStop(0.25, "rgba(0,0,0,0)")
-    grad_over.addColorStop(0.75, "rgba(0,0,0,0)")
-    grad_over.addColorStop(1, "rgba(0,0,0,0.9)")
-    ctx.fillStyle = grad_over
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-def animar_giro(objetivo_idx, duracion, inicio_time, inicio_offset):
-    global offset_y, girando
-    ahora = time.time()
-    progreso = (ahora - inicio_time) / duracion
-
-    if progreso >= 1:
-        # Final exacto: alinear el índice objetivo al centro
-        offset_y = (canvas.height/2 - altura_item/2) - (objetivo_idx * altura_item)
-        render_carrete(offset_y, 0)
+    if progress >= 1:
+        angle_step = (2 * math.pi) / len(numeros)
+        VISUAL_OFFSET = -(target_idx * angle_step)
+        render_carrete(VISUAL_OFFSET, 0)
         girando = False
-        # Llamamos a finalizar después de un pequeño retardo para asegurar render y UX (50ms)
-        timer.set_timeout(lambda: finalizar_juego(numeros_carrete[objetivo_idx]), 50)
+        timer.set_timeout(lambda: finalizar_juego(numeros[target_idx]), 150)
         return
 
-    # Easing: "Back Out" (rebote mecánico)
-    s = 1.2
-    p_inv = 1 - progreso
-    p = 1 - (p_inv**3 * (1 - progreso * (s * p_inv - s)))
+    ease = 1 - math.pow(1 - progress, 5)
+    vueltas_totales = 10 * (2 * math.pi)
+    distancia_total = vueltas_totales + (target_idx * (2 * math.pi / len(numeros)))
+    
+    current_rot = start_rotation - (distancia_total * ease)
+    speed = (1 - progress) * 40
+    
+    VISUAL_OFFSET = current_rot
+    render_carrete(current_rot, speed)
+    window.requestAnimationFrame(lambda t: animar(target_idx, duration, start_time, start_rotation))
 
-    vueltas = 10
-    distancia_total = (len(numeros_carrete) * vueltas * altura_item)
-    actual_pos = inicio_offset - (distancia_total * p)
-
-    # Velocidad para el desenfoque (ajustada)
-    velocidad = (distancia_total / duracion) * (1 - progreso) * 0.9
-
-    offset_y = actual_pos
-    render_carrete(actual_pos, velocidad)
-    # requestAnimationFrame -> continuar animación
-    window.requestAnimationFrame(lambda t: animar_giro(objetivo_idx, duracion, inicio_time, inicio_offset))
-
-def actualizar_ui():
-    document['puntos'].html = f"{puntos:,} <span>TOKEN</span>"
-    document['intentos-display'].text = f"Cargas: {intentos} / 5"
-
-def cambiar_tipo(ev):
-    global tipo_apuesta
-    for b in ['bet-exacto', 'bet-paridad', 'bet-rango']:
-        document[b].classList.remove('active')
-
-    ev.target.classList.add('active')
-    tipo_apuesta = ev.target.id.split('-')[1]
-
-    select = document['sub-opcion']
-    select.html = ""
-    if tipo_apuesta == "exacto":
-        for i in range(1, 21): select <= html.OPTION(str(i), value=str(i))
-    elif tipo_apuesta == "paridad":
-        select <= html.OPTION("PAR", value="par")
-        select <= html.OPTION("IMPAR", value="impar")
-    elif tipo_apuesta == "rango":
-        select <= html.OPTION("BAJO (1-10)", value="bajo")
-        select <= html.OPTION("ALTO (11-20)", value="alto")
-
-def iniciar_giro(ev):
-    global puntos, intentos, girando, offset_y
+def iniciar_giro(ev=None):
+    global puntos, intentos, girando, VISUAL_OFFSET
     if girando or intentos <= 0: return
-
     try:
         monto = int(document['monto-apuesta'].value)
-    except:
-        document['mensaje'].text = "⚠️ Ingresa un monto válido"; return
-
+    except: return
+    
     if monto > puntos:
-        document['mensaje'].text = "🚫 Fondos insuficientes"; return
-
+        document['mensaje'].text = "⚠️ SALDO INSUFICIENTE"
+        return
+    
     intentos -= 1
     puntos -= monto
     girando = True
     actualizar_ui()
-    document['mensaje'].text = "🎰 Girando carrete..."
+    document['mensaje'].text = "¡BUENA SUERTE!"
+    
+    ganador_idx = random.randint(0, len(numeros) - 1)
+    animar(ganador_idx, 4.5, time.time(), VISUAL_OFFSET)
 
-    ganador_idx = random.randint(0, len(numeros_carrete)-1)
-    # pasar el offset actual para continuidad en la animación
-    animar_giro(ganador_idx, 3.5, time.time(), offset_y)
+def comprar_carga(ev):
+    global puntos, intentos, girando
+    if girando: return
+    
+    VALOR_CARGA = 50
+    if puntos >= VALOR_CARGA:
+        puntos -= VALOR_CARGA
+        intentos += 1
+        document['mensaje'].text = "🔋 CARGA ADQUIRIDA (+1)"
+        document['btn-girar'].style.display = "block"
+        document['btn-reiniciar'].style.display = "none"
+        actualizar_ui()
+    else:
+        document['mensaje'].text = "❌ TOKENS INSUFICIENTES"
 
 def finalizar_juego(resultado):
     global puntos
     sub_val = document['sub-opcion'].value
-    try:
-        monto = int(document['monto-apuesta'].value)
-    except:
-        monto = 0
+    monto = int(document['monto-apuesta'].value)
     gana = False
     premio = 0
 
-    if tipo_apuesta == "exacto" and str(resultado) == sub_val:
-        premio = monto * 15; gana = True
-    elif tipo_apuesta == "paridad":
-        if (sub_val == "par" and resultado % 2 == 0) or (sub_val == "impar" and resultado % 2 != 0):
-            premio = monto * 2; gana = True
-    elif tipo_apuesta == "rango":
-        if (sub_val == "bajo" and 1 <= resultado <= 10) or (sub_val == "alto" and 11 <= resultado <= 20):
-            premio = monto * 2; gana = True
+    # LÓGICA DE PAGOS MODIFICADA (HOUSE EDGE)
+    
+    # Apuesta Exacta: Paga x18
+    if tipo_apuesta == "exacto":
+        if str(resultado) == sub_val:
+            premio = int(monto * 18)
+            gana = True
+            
+    # El 0 hace perder automáticamente apuestas de Paridad y Rango
+    elif resultado != 0:
+        if tipo_apuesta == "paridad":
+            # Paga x1.9
+            if (sub_val == "par" and resultado % 2 == 0) or \
+               (sub_val == "impar" and resultado % 2 != 0):
+                premio = int(monto * 1.9)
+                gana = True
+                
+        elif tipo_apuesta == "rango":
+            # Paga x1.9
+            if (sub_val == "bajo" and 1 <= resultado <= 10) or \
+               (sub_val == "alto" and 11 <= resultado <= 20):
+                premio = int(monto * 1.9)
+                gana = True
 
     if gana:
         puntos += premio
-        document['mensaje'].text = f"🔥 ¡ACIERTO! Salió {resultado}"
-        window.confetti({'particleCount': 120, 'spread': 70, 'origin': {'y': 0.6}})
+        document['mensaje'].text = f"✅ ¡PREMIO: {premio} TOKENS!"
+        window.confetti({'particleCount': 100, 'spread': 70, 'origin': {'y': 0.6}, 'colors': ['#d4af37', '#ffffff']})
     else:
-        document['mensaje'].text = f"❌ Perdiste. Cayó el {resultado}"
+        if resultado == 0:
+            document['mensaje'].text = "⛔ CERO - LA CASA GANA"
+        else:
+            document['mensaje'].text = f"Salió el {resultado}. Intenta de nuevo."
 
     actualizar_ui()
-    if puntos <= 0 and intentos <= 0:
+    
+    if puntos < 10 and intentos <= 0:
         document['btn-girar'].style.display = "none"
         document['btn-reiniciar'].style.display = "block"
-        document['mensaje'].text = "💀 BANCARROTA"
+        document['mensaje'].text = "SIN FONDOS DISPONIBLES"
 
-def comprar_carga(ev):
-    global puntos, intentos
-    if puntos >= 20:
-        puntos -= 20
-        intentos += 1
-        actualizar_ui()
-        document['mensaje'].text = "⚡ +1 Carga añadida"
-    else:
-        document['mensaje'].text = "⚠️ Necesitas 20 tokens"
+def actualizar_ui():
+    document['puntos'].html = f"{puntos:,} <span>TOKENS</span>"
+    document['intentos-display'].text = f"CARGAS: {intentos} / 5"
+
+def cambiar_tipo(ev):
+    global tipo_apuesta
+    # Reset clases visuales
+    for b in ['bet-exacto', 'bet-paridad', 'bet-rango']:
+        document[b].classList.remove('active')
+    
+    target = ev.target
+    target.classList.add('active')
+    
+    # Extraer tipo de ID
+    tipo_apuesta = target.id.split('-')[1]
+    
+    select = document['sub-opcion']
+    select.html = ""
+    
+    if tipo_apuesta == "exacto":
+        # Ahora incluye el 0 en las opciones
+        for i in range(0, 21): 
+            select <= html.OPTION(str(i), value=str(i))
+            
+    elif tipo_apuesta == "paridad":
+        select <= html.OPTION("PAR (x1.9)", value="par")
+        select <= html.OPTION("IMPAR (x1.9)", value="impar")
+        
+    elif tipo_apuesta == "rango":
+        select <= html.OPTION("BAJO 1-10 (x1.9)", value="bajo")
+        select <= html.OPTION("ALTO 11-20 (x1.9)", value="alto")
+
+def handle_keydown(ev):
+    if ev.keyCode == 13: iniciar_giro()
 
 def reiniciar(ev):
-    global puntos, intentos, offset_y, girando
+    global puntos, intentos
     puntos, intentos = 1000, 5
-    offset_y = 0
-    girando = False
     document['btn-girar'].style.display = "block"
     document['btn-reiniciar'].style.display = "none"
     actualizar_ui()
-    document['mensaje'].text = "¡Mesa lista!"
+    document['mensaje'].text = "SISTEMA REINICIADO"
 
-# Eventos
+# Bindings
 document['btn-girar'].bind('click', iniciar_giro)
-document['btn-extra'].bind('click', comprar_carga)
 document['btn-reiniciar'].bind('click', reiniciar)
+document['btn-comprar-carga'].bind('click', comprar_carga)
 document['bet-exacto'].bind('click', cambiar_tipo)
 document['bet-paridad'].bind('click', cambiar_tipo)
 document['bet-rango'].bind('click', cambiar_tipo)
+document.bind('keydown', handle_keydown)
 
-# Inicio
+# Iniciar
 render_carrete(0)
+# Inicializar selección
 cambiar_tipo(type('obj', (object,), {'target': document['bet-exacto']}))
 actualizar_ui()
 </script>

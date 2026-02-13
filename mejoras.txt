@@ -1,0 +1,25 @@
+Diseña un sistema de retiros matemáticamente blindado para un juego tipo ruleta con tokens donde:
+
+1 CUP = 10 tokens
+
+RTP configurable entre 85% y 90%
+
+La casa debe mantener ventaja matemática positiva en todo momento
+
+El sistema debe incluir:
+
+Requisito de apuesta mínima (wagering) de al menos 3x el depósito antes de permitir retiro.
+
+Límite máximo de retiro por usuario (ej: 150% del depósito inicial por ciclo).
+
+Límite de retiro diario y mensual.
+
+Control de balance general de la casa (si el fondo baja de cierto porcentaje, reducir pagos automáticamente dentro del RTP permitido).
+
+Fondo de reserva obligatorio (mínimo 30% de ingresos no retirables).
+
+Protección contra retiros inmediatos tras una sola jugada ganadora.
+
+Registro de métricas: volumen apostado, RTP real, beneficio neto y liquidez disponible.
+
+El sistema debe priorizar estabilidad financiera, escalabilidad y control de riesgo sin alterar la experiencia visual del juego.
