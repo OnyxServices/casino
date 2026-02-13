@@ -1,25 +1,48 @@
-Diseña un sistema de retiros matemáticamente blindado para un juego tipo ruleta con tokens donde:
+📊 1. Estadísticas Avanzadas del Jugador
+Para que el usuario sienta que tiene una "carrera" en el casino, podrías registrar y mostrar:
 
-1 CUP = 10 tokens
+Historial de Sesión: Gráficos de balance (puntos vs. tiempo) para ver rachas ganadoras.
 
-RTP configurable entre 85% y 90%
+Mapa de Calor de Números: Indicar cuáles son sus números "de la suerte" (los que más han salido en sus giros).
 
-La casa debe mantener ventaja matemática positiva en todo momento
+Métricas de Rendimiento: Win/Loss ratio, mayor premio ganado en un solo giro y total de tokens apostados históricamente.
 
-El sistema debe incluir:
+Logros y Medallas: "El Suertudo" (ganar 3 veces seguidas), "High Roller" (apostar el máximo permitido), etc.
 
-Requisito de apuesta mínima (wagering) de al menos 3x el depósito antes de permitir retiro.
+🏆 2. Ranking y Competitividad (Social)
+El "pique" entre jugadores es lo que mantiene vivo este tipo de juegos:
 
-Límite máximo de retiro por usuario (ej: 150% del depósito inicial por ciclo).
+Leaderboard Global: Tabla con los 10 jugadores con más tokens.
 
-Límite de retiro diario y mensual.
+Ranking Semanal: Reiniciar una tabla cada lunes para dar premios (tokens extra) a los mejores de la semana.
 
-Control de balance general de la casa (si el fondo baja de cierto porcentaje, reducir pagos automáticamente dentro del RTP permitido).
+Feed en Vivo: Un pequeño banner que diga: "¡Usuario_123 acaba de ganar 1,800 tokens en el número 0!"
 
-Fondo de reserva obligatorio (mínimo 30% de ingresos no retirables).
+Clanes o Ligas: Agrupar jugadores para competir por un bote acumulado (Jackpot) compartido.
 
-Protección contra retiros inmediatos tras una sola jugada ganadora.
+💰 3. Economía y Retención (Engagement)
+Para evitar que el juego termine cuando alguien llega a cero:
 
-Registro de métricas: volumen apostado, RTP real, beneficio neto y liquidez disponible.
+Bono Diario: Regalar 500 tokens cada 24 horas por iniciar sesión.
 
-El sistema debe priorizar estabilidad financiera, escalabilidad y control de riesgo sin alterar la experiencia visual del juego.
+Sistema de Niveles (XP): Cada apuesta otorga experiencia. Subir de nivel podría desbloquear nuevos límites de apuesta o multiplicadores especiales.
+
+Tienda de Cosméticos: Permitir que los usuarios compren colores de "fuego" para el carrete o avatares exclusivos usando sus tokens ganados.
+
+Referidos: Un código para invitar amigos y recibir una comisión de sus ganancias.
+
+🛠️ 4. Infraestructura y Seguridad
+Si pasas a un modelo con usuarios, la lógica ya no puede vivir solo en el navegador (Brython), necesitarás:
+
+Backend (Python/Flask o FastAPI): Para validar que el usuario realmente tiene los tokens antes de girar (evitar trampas editando el código en consola).
+
+Base de Datos (PostgreSQL/MongoDB): Para guardar perfiles, contraseñas (hasheadas) y saldos.
+
+Autenticación: Login con Google o correo electrónico.
+
+🎰 5. Mejoras en el Gameplay (Mecánicas)
+Apuestas Múltiples: Permitir apostar a varios números o rangos en el mismo giro (como en la ruleta real).
+
+Modo Auto-Spin: Configurar el juego para que gire solo bajo ciertas condiciones (ej. "parar si gano más de 1000").
+
+Jackpot Progresivo: Un pequeño porcentaje de cada apuesta de todos los usuarios va a un pozo común que solo se gana con una condición ultra difícil.
