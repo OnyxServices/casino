@@ -2,516 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onyx Casino | Free Spins & Timer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Onyx Casino | Elite Gaming</title>
     
+    <!-- Librerías Externas -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <style>
-        :root {
-            --onyx: #050505;
-            --gold: #d4af37;
-            --gold-light: #f1d592;
-            --glass: rgba(20, 20, 20, 0.98);
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        .casino-container {
-            width: 90%;
-            max-width: 400px;
-            background: var(--glass);
-            border: 2px solid #222;
-            border-top: 2px solid var(--gold);
-            border-radius: 30px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.1);
-            position: relative;
-        }
-
-        /* --- NUEVOS ELEMENTOS FLOTANTES --- */
-        #timer-flotante {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-family: monospace;
-            font-size: 1.2rem;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-            z-index: 1000;
-            display: none; /* Oculto por defecto */
-        }
-
-        #toast-notification {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, var(--gold), #f1d592);
-            color: #000;
-            padding: 15px 25px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 2000;
-            display: none;
-            pointer-events: none;
-            white-space: nowrap;
-            border: 2px solid #fff;
-        }
-
-        /* --- CARRETE ULTRA REALISTA --- */
-        #canvas-wrapper {
-            position: relative;
-            margin: 25px auto;
-            width: 160px;
-            height: 240px;
-            border-radius: 20px;
-            background: #080808;
-            padding: 10px;
-            border: 1px solid #333;
-            box-shadow: inset 0 0 20px #000;
-        }
-
-        #canvas-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #050505;
-            border: 1px solid #1a1a1a;
-        }
-
-        #canvas-container::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%);
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .overlay-shadow {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 15%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 85%, rgba(0,0,0,1) 100%);
-            pointer-events: none;
-            z-index: 4;
-        }
-
-        .win-marker {
-            position: absolute;
-            top: 50%; left: 0; right: 0; height: 2px;
-            background: var(--gold);
-            transform: translateY(-50%);
-            z-index: 10;
-            box-shadow: 0 0 10px var(--gold);
-            opacity: 0.7;
-        }
-
-        canvas { display: block; image-rendering: -webkit-optimize-contrast; }
-
-        /* --- UI --- */
-        .puntos-display { font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; }
-        .puntos-display span { font-size: 0.8rem; color: var(--gold); letter-spacing: 2px; }
-        
-        .intentos-badge {
-            display: inline-block;
-            background: #111;
-            border: 1px solid #333;
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            color: #888;
-            margin-bottom: 5px;
-        }
-
-        .btn-comprar {
-            display: block;
-            margin: 0 auto 15px auto;
-            background: none;
-            border: 1px solid #d4af3755;
-            color: var(--gold);
-            font-size: 0.65rem;
-            padding: 4px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-comprar:hover { background: #d4af3722; border-color: var(--gold); }
-
-        .grid-opciones {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: white;
-            text-align: center;
-            font-size: 1rem;
-            transition: border 0.3s;
-        }
-
-        button { cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; }
-
-        .btn-principal {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(to bottom, #f1d592, #d4af37);
-            border-radius: 15px;
-            color: #000;
-            font-weight: 800;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            box-shadow: 0 4px 0 #927621;
-        }
-        .btn-principal:active { transform: translateY(3px); box-shadow: 0 1px 0 #927621; }
-
-        .btn-secundario {
-            background: #151515;
-            color: #666;
-            border: 1px solid #222;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-        }
-        .btn-secundario.active {
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--gold);
-            border-color: var(--gold);
-        }
-
-        #mensaje { min-height: 1.2rem; margin-top: 15px; font-weight: 600; color: var(--gold-light); }
-        .hint { font-size: 0.7rem; color: #444; margin-top: 10px; }
-    </style>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body onload="brython()">
 
-<div id="timer-flotante" class="animate__animated">⏳ 30:00</div>
-
-<div class="casino-container animate__animated animate__fadeIn">
-    
-    <div id="toast-notification" class="animate__animated">+1 TIRO GRATIS 🎰</div>
-
-    <div class="intentos-badge" id="intentos-display">CARGAS: 5 / 5</div>
-    <button class="btn-comprar" id="btn-comprar-carga">+ COMPRAR CARGA (50 TOKENS)</button>
-    
-    <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
-    
-    <div id="canvas-wrapper">
-        <div id="canvas-container">
-            <div class="overlay-shadow"></div>
-            <div class="win-marker"></div>
-            <canvas id="ruleta" width="140" height="220"></canvas>
+    <!-- PANTALLA DE CARGA -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-logo animate__animated animate__pulse animate__infinite">ONYX</div>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="loader-text">Iniciando Sistemas...</div>
         </div>
     </div>
 
-    <div class="seccion-apuesta">
-        <input type="number" id="monto-apuesta" value="100" min="10">
+    <!-- Timer para recarga de energía -->
+    <div id="timer-flotante" class="animate__animated">⏳ 30:00</div>
 
-        <div class="grid-opciones">
-            <button class="btn-secundario active" id="bet-exacto">NÚMERO (x18)</button>
-            <button class="btn-secundario" id="bet-paridad">PARIDAD (x1.9)</button>
-            <button class="btn-secundario" id="bet-rango">RANGO (x1.9)</button>
-            <select id="sub-opcion"></select>
+    <div class="casino-container animate__animated animate__fadeIn">
+        
+        <!-- Notificación flotante de premio -->
+        <div id="toast-notification" class="animate__animated">+1 TIRO GRATIS 🎰</div>
+
+        <div class="header-stats">
+            <div class="intentos-badge" id="intentos-display">CARGAS: 5 / 5</div>
+            <button class="btn-comprar" id="btn-comprar-carga">+ COMPRAR CARGA (50 TOKENS)</button>
+        </div>
+        
+        <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
+        
+        <!-- Contenedor Visual de la Ruleta -->
+        <div id="canvas-wrapper">
+            <div id="canvas-container">
+                <div class="overlay-shadow"></div>
+                <div class="win-marker"></div>
+                <canvas id="ruleta" width="140" height="220"></canvas>
+            </div>
         </div>
 
-        <button class="btn-principal" id="btn-girar">GIRAR (ENTER)</button>
-        <div class="hint">Presiona ENTER para jugar rápido</div>
-        <button class="btn-principal" id="btn-reiniciar" style="display:none; background: #ff4b2b; box-shadow: 0 4px 0 #a31d06; color:white;">REINICIAR JUEGO</button>
+        <!-- Panel de Control -->
+        <div class="seccion-apuesta">
+            <label style="font-size: 0.7rem; color: #666;">MONTO A APOSTAR:</label>
+            <input type="number" id="monto-apuesta" value="100" min="10">
+
+            <div class="grid-opciones">
+                <button class="btn-secundario active" id="bet-exacto">NÚMERO (x20)</button>
+                <button class="btn-secundario" id="bet-paridad">PARIDAD (x1.9)</button>
+                <button class="btn-secundario" id="bet-rango">RANGO (x1.9)</button>
+                <select id="sub-opcion"></select>
+            </div>
+
+            <button class="btn-principal" id="btn-girar">GIRAR (ENTER)</button>
+            <div class="hint">Presiona ENTER para jugar rápido</div>
+            
+            <!-- Botón oculto de reinicio cuando te quedas a cero -->
+            <button class="btn-principal" id="btn-reiniciar" style="display:none; background: #ff4b2b; box-shadow: 0 4px 0 #a31d06; color:white;">REINICIAR JUEGO</button>
+        </div>
+
+        <p id="mensaje">BIENVENIDO A ONYX</p>
     </div>
 
-    <p id="mensaje">ELIGE TU DESTINO</p>
-</div>
-
-<script type="text/python">
-from browser import document, window, timer, html
-import random
-import time
-import math
-
-# --- CONFIGURACIÓN ---
-puntos = 1000
-intentos = 5
-tipo_apuesta = "exacto"
-numeros = list(range(0, 21)) # Rango 0-20
-canvas = document["ruleta"]
-ctx = canvas.getContext("2d")
-RADIUS = 280 
-VISUAL_OFFSET = 0
-girando = False
-
-# --- VARIABLES DEL TIMER ---
-tiempo_restante = 1800 # 30 minutos en segundos
-timer_interval = None
-
-def render_carrete(rotation_offset, blur_strength=0):
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    center_y = canvas.height / 2
-    for i in range(len(numeros)):
-        angle_step = (2 * math.pi) / len(numeros)
-        angle = (i * angle_step) + rotation_offset
-        cos_angle = math.cos(angle)
-        
-        if cos_angle > 0:
-            y = center_y + RADIUS * math.sin(angle)
-            scale = 0.4 + (0.6 * cos_angle)
-            opacity = math.pow(cos_angle, 3) 
-            
-            if opacity < 0.05: continue
-
-            ctx.save()
-            ctx.globalAlpha = opacity
-            
-            steps = 1 if blur_strength < 5 else 3
-            for s in range(steps):
-                offset_blur = (s * blur_strength * 0.15)
-                es_ganador = abs(y - center_y) < 15
-                
-                num_actual = numeros[i]
-                if es_ganador:
-                    ctx.fillStyle = "#f1d592"
-                    ctx.font = f"bold {int(55 * scale)}px Arial Black"
-                else:
-                    ctx.fillStyle = "#ff4b4b" if num_actual == 0 else "white"
-                    ctx.font = f"bold {int(45 * scale)}px Arial"
-                
-                ctx.textAlign = "center"
-                ctx.textBaseline = "middle"
-                ctx.fillText(str(num_actual), canvas.width/2, y + offset_blur)
-            ctx.restore()
-
-def animar(target_idx, duration, start_time, start_rotation):
-    global VISUAL_OFFSET, girando
-    now = time.time()
-    elapsed = now - start_time
-    progress = elapsed / duration
-
-    if progress >= 1:
-        angle_step = (2 * math.pi) / len(numeros)
-        VISUAL_OFFSET = -(target_idx * angle_step)
-        render_carrete(VISUAL_OFFSET, 0)
-        girando = False
-        timer.set_timeout(lambda: finalizar_juego(numeros[target_idx]), 150)
-        return
-
-    ease = 1 - math.pow(1 - progress, 5)
-    vueltas_totales = 10 * (2 * math.pi)
-    distancia_total = vueltas_totales + (target_idx * (2 * math.pi / len(numeros)))
-    current_rot = start_rotation - (distancia_total * ease)
-    speed = (1 - progress) * 40
-    VISUAL_OFFSET = current_rot
-    render_carrete(current_rot, speed)
-    window.requestAnimationFrame(lambda t: animar(target_idx, duration, start_time, start_rotation))
-
-# --- LÓGICA DEL TIMER ---
-def actualizar_timer():
-    global tiempo_restante, intentos, timer_interval
-    if tiempo_restante > 0:
-        tiempo_restante -= 1
-        mins = tiempo_restante // 60
-        secs = tiempo_restante % 60
-        document['timer-flotante'].text = f"⏳ {mins:02d}:{secs:02d}"
-    else:
-        # Se acabó el tiempo -> Recarga
-        timer.clear_interval(timer_interval)
-        timer_interval = None
-        intentos = 5
-        document['timer-flotante'].style.display = "none"
-        document['btn-girar'].style.display = "block"
-        document['btn-reiniciar'].style.display = "none"
-        document['mensaje'].text = "🔋 ¡RECARGA AUTOMÁTICA COMPLETADA!"
-        actualizar_ui()
-
-def iniciar_timer_si_necesario():
-    global timer_interval, tiempo_restante
-    if intentos <= 0 and timer_interval is None:
-        tiempo_restante = 1800 # Reiniciar a 30 mins
-        document['timer-flotante'].style.display = "block"
-        document['timer-flotante'].classList.add("animate__fadeInDown")
-        timer_interval = timer.set_interval(actualizar_timer, 1000)
-        actualizar_timer() # Primera llamada inmediata
-
-def detener_timer():
-    global timer_interval
-    if timer_interval:
-        timer.clear_interval(timer_interval)
-        timer_interval = None
-        document['timer-flotante'].style.display = "none"
-
-# --- NOTIFICACIÓN TOAST ---
-def mostrar_toast_gratis():
-    toast = document['toast-notification']
-    toast.style.display = "block"
-    toast.classList.remove("animate__fadeOutUp")
-    toast.classList.add("animate__fadeInUp")
-    
-    def ocultar():
-        toast.classList.remove("animate__fadeInUp")
-        toast.classList.add("animate__fadeOutUp")
-        timer.set_timeout(lambda: setattr(toast.style, 'display', 'none'), 1000)
-        
-    timer.set_timeout(ocultar, 2000)
-
-def iniciar_giro(ev=None):
-    global puntos, intentos, girando, VISUAL_OFFSET
-    if girando or intentos <= 0: return
-    try:
-        monto = int(document['monto-apuesta'].value)
-    except: return
-    
-    if monto > puntos:
-        document['mensaje'].text = "⚠️ SALDO INSUFICIENTE"
-        return
-    
-    intentos -= 1
-    puntos -= monto
-    girando = True
-    actualizar_ui()
-    document['mensaje'].text = "¡BUENA SUERTE!"
-    
-    ganador_idx = random.randint(0, len(numeros) - 1)
-    animar(ganador_idx, 4.5, time.time(), VISUAL_OFFSET)
-
-def comprar_carga(ev):
-    global puntos, intentos, girando
-    if girando: return
-    
-    VALOR_CARGA = 50
-    if puntos >= VALOR_CARGA:
-        puntos -= VALOR_CARGA
-        intentos += 1
-        detener_timer() # Si compra, quitamos el timer
-        document['mensaje'].text = "🔋 CARGA ADQUIRIDA (+1)"
-        document['btn-girar'].style.display = "block"
-        document['btn-reiniciar'].style.display = "none"
-        actualizar_ui()
-    else:
-        document['mensaje'].text = "❌ TOKENS INSUFICIENTES"
-
-def finalizar_juego(resultado):
-    global puntos, intentos
-    sub_val = document['sub-opcion'].value
-    monto = int(document['monto-apuesta'].value)
-    gana = False
-    premio = 0
-
-    # Lógica de Pagos y Ganancia
-    if tipo_apuesta == "exacto":
-        if str(resultado) == sub_val:
-            premio = int(monto * 18); gana = True
-    elif resultado != 0:
-        if tipo_apuesta == "paridad":
-            if (sub_val == "par" and resultado % 2 == 0) or \
-               (sub_val == "impar" and resultado % 2 != 0):
-                premio = int(monto * 1.9); gana = True
-        elif tipo_apuesta == "rango":
-            if (sub_val == "bajo" and 1 <= resultado <= 10) or \
-               (sub_val == "alto" and 11 <= resultado <= 20):
-                premio = int(monto * 1.9); gana = True
-
-    if gana:
-        puntos += premio
-        intentos += 1 # --- TIRO GRATIS POR ACIERTO ---
-        detener_timer() # Si ganamos carga, quitamos timer si estaba activo
-        document['mensaje'].text = f"✅ ¡PREMIO: {premio} TOKENS!"
-        mostrar_toast_gratis() # --- NOTIFICACIÓN FLOTANTE ---
-        window.confetti({'particleCount': 100, 'spread': 70, 'origin': {'y': 0.6}, 'colors': ['#d4af37', '#ffffff']})
-    else:
-        if resultado == 0:
-            document['mensaje'].text = "⛔ CERO - LA CASA GANA"
-        else:
-            document['mensaje'].text = f"Salió el {resultado}. Intenta de nuevo."
-
-    actualizar_ui()
-    
-    # Verificar Game Over o Iniciar Timer
-    if intentos <= 0:
-        if puntos < 10:
-            # Game Over total
-            document['btn-girar'].style.display = "none"
-            document['btn-reiniciar'].style.display = "block"
-            document['mensaje'].text = "SIN FONDOS DISPONIBLES"
-        else:
-            # Solo sin cargas -> Iniciar Timer
-            iniciar_timer_si_necesario()
-            document['mensaje'].text = "SIN CARGAS - ESPERANDO RECARGA..."
-
-def actualizar_ui():
-    document['puntos'].html = f"{puntos:,} <span>TOKENS</span>"
-    document['intentos-display'].text = f"CARGAS: {intentos} / 5"
-
-def cambiar_tipo(ev):
-    global tipo_apuesta
-    for b in ['bet-exacto', 'bet-paridad', 'bet-rango']:
-        document[b].classList.remove('active')
-    target = ev.target
-    target.classList.add('active')
-    tipo_apuesta = target.id.split('-')[1]
-    select = document['sub-opcion']
-    select.html = ""
-    if tipo_apuesta == "exacto":
-        for i in range(0, 21): select <= html.OPTION(str(i), value=str(i))
-    elif tipo_apuesta == "paridad":
-        select <= html.OPTION("PAR (x1.9)", value="par")
-        select <= html.OPTION("IMPAR (x1.9)", value="impar")
-    elif tipo_apuesta == "rango":
-        select <= html.OPTION("BAJO 1-10 (x1.9)", value="bajo")
-        select <= html.OPTION("ALTO 11-20 (x1.9)", value="alto")
-
-def handle_keydown(ev):
-    if ev.keyCode == 13: iniciar_giro()
-
-def reiniciar(ev):
-    global puntos, intentos
-    puntos, intentos = 1000, 5
-    detener_timer()
-    document['btn-girar'].style.display = "block"
-    document['btn-reiniciar'].style.display = "none"
-    actualizar_ui()
-    document['mensaje'].text = "SISTEMA REINICIADO"
-
-# Bindings
-document['btn-girar'].bind('click', iniciar_giro)
-document['btn-reiniciar'].bind('click', reiniciar)
-document['btn-comprar-carga'].bind('click', comprar_carga)
-document['bet-exacto'].bind('click', cambiar_tipo)
-document['bet-paridad'].bind('click', cambiar_tipo)
-document['bet-rango'].bind('click', cambiar_tipo)
-document.bind('keydown', handle_keydown)
-
-# Iniciar
-render_carrete(0)
-cambiar_tipo(type('obj', (object,), {'target': document['bet-exacto']}))
-actualizar_ui()
-</script>
+    <!-- Carga del script lógico -->
+    <script type="text/python" src="script.py"></script>
 </body>
 </html>
