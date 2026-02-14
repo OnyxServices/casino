@@ -1,8 +1,10 @@
+/* --- VARIABLES Y BASES --- */
 :root {
     --onyx: #050505;
     --gold: #d4af37;
     --gold-light: #f1d592;
     --glass: rgba(20, 20, 20, 0.98);
+    --border-color: #333;
 }
 
 body {
@@ -17,116 +19,51 @@ body {
     overflow-x: hidden;
 }
 
-/* --- CARGA --- */
-#loading-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: black url('https://onyxservices.github.io/casino/img/carga.jpg') no-repeat center center;
-    background-size: cover;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.8s ease, visibility 0.8s;
-}
-
-#loading-screen::before {
-    content: "";
-    position: absolute;
-    top:0; left:0; width:100%; height:100%;
-    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
-}
-
-#loading-screen.loader-hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none; /* Evita que bloquee clics después de ocultarse */
-}
-
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.btn-principal:disabled {
-    filter: grayscale(1);
-    opacity: 0.7;
-    cursor: not-content;
-}
-
-.loader-content { position: relative; z-index: 10; text-align: center; }
-.loader-logo { font-size: 3rem; font-weight: 900; color: var(--gold); letter-spacing: 10px; margin-bottom: 20px; }
-.progress-container { width: 250px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid rgba(212,175,55,0.3); margin: 0 auto; }
-.progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); animation: progressAnim 5s linear forwards; }
-.loader-hidden { opacity: 0; visibility: hidden; }
-
-@keyframes progressAnim { to { width: 100%; } }
-
 /* --- CONTENEDOR PRINCIPAL --- */
 .casino-container {
     width: 92%;
     max-width: 400px;
     background: var(--glass);
-    border: 2px solid #222;
-    border-top: 2px solid var(--gold);
+    border: 1px solid #222;
+    border-top: 3px solid var(--gold);
     border-radius: 30px;
     padding: 1.5rem;
     text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
     position: relative;
-    margin: 20px auto;
 }
 
-#timer-flotante {
-    position: fixed;
-    top: 15px; right: 15px;
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    padding: 8px 15px;
-    border-radius: 12px;
-    font-family: monospace;
-    font-size: 1rem;
-    z-index: 1000;
-    display: none;
-}
-
-/* --- ELEMENTOS DE JUEGO --- */
-#toast-notification {
-    position: absolute;
-    top: 40%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, var(--gold), #f1d592);
-    color: #000;
-    padding: 12px 20px;
-    border-radius: 50px;
+.puntos-display {
+    font-size: 2.2rem;
     font-weight: 900;
-    z-index: 2000;
-    display: none;
-    white-space: nowrap;
+    margin-bottom: 5px;
+    letter-spacing: -1px;
 }
 
+.puntos-display span {
+    font-size: 0.7rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* --- RULETA (CANVAS) --- */
 #canvas-wrapper {
     position: relative;
     margin: 15px auto;
-    width: 140px;
-    height: 220px;
+    width: 130px;
+    height: 190px;
     border-radius: 20px;
     background: #080808;
-    padding: 10px;
-    border: 1px solid #333;
+    padding: 8px;
+    border: 1px solid #222;
+    box-shadow: inset 0 0 20px #000;
 }
 
 #canvas-container {
     position: relative;
     width: 100%; height: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     background: #050505;
 }
@@ -134,8 +71,13 @@ input::-webkit-inner-spin-button {
 .overlay-shadow {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
+    background: linear-gradient(to bottom, 
+        rgba(0,0,0,1) 0%, 
+        rgba(0,0,0,0) 30%, 
+        rgba(0,0,0,0) 70%, 
+        rgba(0,0,0,1) 100%);
     z-index: 4;
+    pointer-events: none;
 }
 
 .win-marker {
@@ -144,93 +86,190 @@ input::-webkit-inner-spin-button {
     background: var(--gold);
     transform: translateY(-50%);
     z-index: 10;
-    box-shadow: 0 0 10px var(--gold);
+    box-shadow: 0 0 15px var(--gold);
 }
 
-/* --- UI --- */
-.puntos-display { font-size: 2rem; font-weight: 900; margin-bottom: 10px; }
-.puntos-display span { font-size: 0.7rem; color: var(--gold); }
-
-.intentos-badge {
-    background: #111;
-    border: 1px solid #333;
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 0.7rem;
-    color: #888;
-}
-
-.btn-comprar {
-    background: none;
-    border: 1px solid #d4af3755;
-    color: var(--gold);
-    font-size: 0.6rem;
-    padding: 4px 8px;
-    border-radius: 5px;
-    margin-top: 5px;
-    cursor: pointer;
-}
-
-.grid-opciones {
+/* --- PANEL DE APUESTAS (ESTRUCTURA DE COLUMNAS) --- */
+.panel-apuestas {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin: 15px 0;
+    grid-template-columns: 1fr 100px; /* Izquierda: Selección | Derecha: Monto */
+    gap: 15px;
+    align-items: end;
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    border: 1px solid #1a1a1a;
 }
 
-input, select {
+.col-header {
+    font-size: 0.6rem;
+    color: #555;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: -5px;
+    text-align: left;
+}
+
+.col-header.right { text-align: center; }
+
+.bet-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+}
+
+.bet-title {
+    font-size: 0.7rem;
+    color: var(--gold-light);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* --- INPUTS Y SELECTS --- */
+select {
     width: 100%;
-    padding: 10px;
     background: #000;
     border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
     border-radius: 10px;
-    color: white;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border 0.3s;
+}
+
+select:focus { border-color: var(--gold); }
+
+input[type="number"] {
+    width: 100%;
+    background: #000;
+    border: 1px solid #444;
+    color: var(--gold-light);
+    padding: 10px;
+    border-radius: 10px;
     text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    outline: none;
     box-sizing: border-box;
 }
 
+input[type="number"]:focus {
+    border-color: var(--gold);
+    background: #050505;
+}
+
+/* Quitar flechas de input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --- BOTONES --- */
 .btn-principal {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(to bottom, #f1d592, #d4af37);
-    border-radius: 12px;
+    padding: 16px;
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    border-radius: 15px;
     color: #000;
-    font-weight: 800;
+    font-weight: 900;
+    font-size: 1rem;
     text-transform: uppercase;
-    box-shadow: 0 4px 0 #927621;
     border: none;
-}
-
-.btn-secundario {
-    background: #151515;
-    color: #666;
-    border: 1px solid #222;
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 0.7rem;
     cursor: pointer;
+    box-shadow: 0 4px 0 #8a6d1d;
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
-.btn-secundario.active {
-    background: rgba(212, 175, 55, 0.1);
+.btn-principal:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #8a6d1d;
+}
+
+.btn-principal:disabled {
+    filter: grayscale(1);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-reiniciar {
+    background: transparent;
+    color: #ff4b2b;
+    border: 1px solid #ff4b2b;
+    padding: 8px 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+/* --- FEEDBACK --- */
+#mensaje {
+    font-size: 0.85rem;
+    margin-top: 15px;
+    color: #888;
+    min-height: 1.2rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- PANTALLA DE CARGA --- */
+#loading-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+#loading-screen.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-content { text-align: center; }
+.loader-logo {
+    font-size: 3rem;
+    font-weight: 900;
     color: var(--gold);
-    border-color: var(--gold);
+    letter-spacing: 12px;
+    margin-bottom: 20px;
 }
 
-#mensaje { font-size: 0.9rem; margin-top: 15px; color: var(--gold-light); min-height: 1.2rem; }
-.hint { font-size: 0.65rem; color: #444; margin: 8px 0; }
+.progress-bar-container {
+    width: 200px;
+    height: 2px;
+    background: #222;
+    margin: 0 auto;
+}
 
-/* --- AJUSTES RESPONSIVE --- */
+.progress-bar {
+    width: 100%;
+    height: 100%;
+    background: var(--gold);
+    animation: loading 2s infinite ease-in-out;
+}
+
+@keyframes loading {
+    0% { transform: scaleX(0); transform-origin: left; }
+    50% { transform: scaleX(1); transform-origin: left; }
+    50.1% { transform: scaleX(1); transform-origin: right; }
+    100% { transform: scaleX(0); transform-origin: right; }
+}
+
+/* --- RESPONSIVE --- */
 @media (max-width: 400px) {
-    .casino-container { padding: 1rem; width: 95%; }
-    .loader-logo { font-size: 2.2rem; }
-    .puntos-display { font-size: 1.8rem; }
-    .btn-principal { padding: 12px; font-size: 0.9rem; }
-    #canvas-wrapper { height: 180px; }
-}
-
-@media (max-height: 700px) {
-    .casino-container { margin: 10px auto; padding: 0.8rem; }
-    #canvas-wrapper { margin: 5px auto; height: 160px; }
-    .puntos-display { margin-bottom: 5px; }
+    .casino-container { padding: 1rem; }
+    .panel-apuestas { grid-template-columns: 1fr 85px; gap: 10px; padding: 10px; }
+    input[type="number"] { font-size: 1rem; padding: 8px; }
 }

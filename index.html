@@ -20,29 +20,18 @@
     <div id="loading-screen">
         <div class="loader-content">
             <div class="loader-logo animate__animated animate__pulse animate__infinite">ONYX</div>
-            <div class="progress-container">
+            <div class="progress-bar-container">
                 <div class="progress-bar"></div>
             </div>
-            <div class="loader-text">Iniciando Sistemas...</div>
         </div>
     </div>
 
-    <!-- Timer para recarga de energía -->
-    <div id="timer-flotante" class="animate__animated">⏳ 30:00</div>
-
     <div class="casino-container animate__animated animate__fadeIn">
         
-        <!-- Notificación flotante de premio -->
-        <div id="toast-notification" class="animate__animated">+1 TIRO GRATIS 🎰</div>
-
-        <div class="header-stats">
-            <div class="intentos-badge" id="intentos-display">CARGAS: 5 / 5</div>
-            <button class="btn-comprar" id="btn-comprar-carga">+ COMPRAR CARGA (50 TOKENS)</button>
-        </div>
-        
+        <!-- Marcador de Tokens -->
         <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
         
-        <!-- Contenedor Visual de la Ruleta -->
+        <!-- Visual de la Ruleta -->
         <div id="canvas-wrapper">
             <div id="canvas-container">
                 <div class="overlay-shadow"></div>
@@ -51,29 +40,54 @@
             </div>
         </div>
 
-        <!-- Panel de Control -->
-        <div class="seccion-apuesta">
-            <label style="font-size: 0.7rem; color: #666;">MONTO A APOSTAR:</label>
-            <input type="number" id="monto-apuesta" value="100" min="10">
+        <!-- PANEL DE APUESTAS (2 COLUMNAS) -->
+        <div class="panel-apuestas">
+            <!-- Encabezados -->
+            <span class="col-header">MÉTODO DE JUEGO</span>
+            <span class="col-header right">CANTIDAD</span>
 
-            <div class="grid-opciones">
-                <button class="btn-secundario active" id="bet-exacto">NÚMERO (x20)</button>
-                <button class="btn-secundario" id="bet-paridad">PARIDAD (x1.9)</button>
-                <button class="btn-secundario" id="bet-rango">RANGO (x1.9)</button>
-                <select id="sub-opcion"></select>
+            <!-- Fila 1: Número Exacto -->
+            <div class="bet-selection">
+                <span class="bet-title">NÚMERO (x20)</span>
+                <select id="val-numero">
+                    <!-- Opciones generadas por Python -->
+                </select>
             </div>
+            <input type="number" id="bet-numero" value="50" min="0" placeholder="0">
 
-            <button class="btn-principal" id="btn-girar">GIRAR (ENTER)</button>
-            <div class="hint">Presiona ENTER para jugar rápido</div>
-            
-            <!-- Botón oculto de reinicio cuando te quedas a cero -->
-            <button class="btn-principal" id="btn-reiniciar" style="display:none; background: #ff4b2b; box-shadow: 0 4px 0 #a31d06; color:white;">REINICIAR JUEGO</button>
+            <!-- Fila 2: Paridad -->
+            <div class="bet-selection">
+                <span class="bet-title">PARIDAD (x1.9)</span>
+                <select id="val-paridad">
+                    <option value="par">PAR</option>
+                    <option value="impar">IMPAR</option>
+                </select>
+            </div>
+            <input type="number" id="bet-paridad" value="50" min="0" placeholder="0">
+
+            <!-- Fila 3: Rango -->
+            <div class="bet-selection">
+                <span class="bet-title">RANGO (x1.9)</span>
+                <select id="val-rango">
+                    <option value="bajo">BAJO (1-10)</option>
+                    <option value="alto">ALTO (11-20)</option>
+                </select>
+            </div>
+            <input type="number" id="bet-rango" value="50" min="0" placeholder="0">
         </div>
 
+        <!-- Botón de Acción -->
+        <button class="btn-principal" id="btn-girar">GIRAR RULETA</button>
+        
+        <!-- Mensajes de Estado -->
         <p id="mensaje">BIENVENIDO A ONYX</p>
+        
+        <!-- Botón de Reinicio (Oculto inicialmente) -->
+        <button class="btn-reiniciar" id="btn-reiniciar" style="display:none;">RECARGAR TOKENS</button>
     </div>
 
-    <!-- Carga del script lógico -->
+    <!-- Script Lógico -->
     <script type="text/python" src="script.py"></script>
+
 </body>
 </html>
