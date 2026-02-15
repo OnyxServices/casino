@@ -12,6 +12,10 @@ RADIUS = 110
 VISUAL_OFFSET = 0
 girando = False
 
+# Historial de giros para estadísticas
+historial_giros = []
+
+# --- RENDERIZADO DE LA RULETA ---
 def render_carrete(rotation_offset, blur_strength=0):
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     center_y = canvas.height / 2
@@ -25,7 +29,7 @@ def render_carrete(rotation_offset, blur_strength=0):
             opacity = max(0, cos_angle)
             ctx.save()
             ctx.globalAlpha = opacity
-            
+
             num_actual = numeros[i]
             if abs(y - center_y) < 15:
                 ctx.fillStyle = "#f1d592"
@@ -33,12 +37,13 @@ def render_carrete(rotation_offset, blur_strength=0):
             else:
                 ctx.fillStyle = "#ff4b4b" if num_actual == 0 else "white"
                 ctx.font = f"bold {int(40 * scale)}px Arial"
-            
+
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
             ctx.fillText(str(num_actual), canvas.width/2, y)
             ctx.restore()
 
+# --- ANIMACIÓN DEL GIRO ---
 def animar(target_idx, duration, start_time, start_rotation):
     global VISUAL_OFFSET, girando
     now = time.time()
@@ -58,11 +63,12 @@ def animar(target_idx, duration, start_time, start_rotation):
     vueltas_totales = 10 * (2 * math.pi)
     distancia_total = vueltas_totales + (target_idx * (2 * math.pi / len(numeros)))
     current_rot = start_rotation - (distancia_total * ease)
-    
+
     VISUAL_OFFSET = current_rot
     render_carrete(current_rot)
     window.requestAnimationFrame(lambda t: animar(target_idx, duration, start_time, start_rotation))
 
+# --- INICIO DE GIRO ---
 def iniciar_giro(ev=None):
     global puntos, girando, VISUAL_OFFSET
     if girando: return
@@ -88,14 +94,18 @@ def iniciar_giro(ev=None):
     girando = True
     document['btn-girar'].disabled = True
     actualizar_ui()
-    
+
     ganador_idx = random.randint(0, len(numeros) - 1)
     animar(ganador_idx, 3.5, time.time(), VISUAL_OFFSET)
 
+# --- FINALIZACIÓN DEL JUEGO ---
 def finalizar_juego(resultado):
     global puntos
     ganancia_total = 0
     msg_detalle = []
+
+    # Guardar en historial
+    historial_giros.append(resultado)
 
     # 1. Check Exacto
     amt_num = int(document['bet-numero'].value or 0)
@@ -123,7 +133,7 @@ def finalizar_juego(resultado):
             msg_detalle.append(f"Rango! (+{premio})")
 
     puntos += ganancia_total
-    
+
     if ganancia_total > 0:
         document['mensaje'].text = " / ".join(msg_detalle)
         window.confetti({'particleCount': 100, 'spread': 70, 'origin': {'y': 0.6}})
@@ -131,12 +141,15 @@ def finalizar_juego(resultado):
         document['mensaje'].text = f"Salió el {resultado}. Suerte la próxima."
 
     actualizar_ui()
+
     if puntos <= 0:
         document['btn-reiniciar'].style.display = "block"
 
+# --- ACTUALIZAR UI ---
 def actualizar_ui():
     document['puntos'].html = f"{puntos:,} <span>TOKENS</span>"
 
+# --- REINICIAR ---
 def reiniciar(ev):
     global puntos
     puntos = 1000
@@ -144,7 +157,55 @@ def reiniciar(ev):
     document['mensaje'].text = "SISTEMA RECARGADO"
     actualizar_ui()
 
-# Inicialización
+# --- MODAL DE ESTADÍSTICAS ---
+def abrir_modal(ev):
+    document['modal-numeros'].style.display = "flex"
+    actualizar_modal()
+
+def cerrar_modal(ev):
+    document['modal-numeros'].style.display = "none"
+
+document['btn-modal'].bind('click', abrir_modal)
+document['close-modal'].bind('click', cerrar_modal)
+
+def actualizar_modal():
+    numeros_recientes = document['numeros-recientes']
+    numeros_frios = document['numeros-frios']
+
+    numeros_recientes.clear()
+    numeros_frios.clear()
+
+    if not historial_giros:
+        numeros_recientes <= html.LI("Aún no hay giros")
+        numeros_frios <= html.LI("Aún no hay giros")
+        return
+
+    # Contar cuántas veces salió cada número
+    conteo = {i:0 for i in range(21)}
+    for n in historial_giros:
+        conteo[n] += 1
+
+    # Zona caliente: los 5 números que más han salido
+    calientes = sorted(conteo.items(), key=lambda x: x[1], reverse=True)
+    zona_caliente = [num for num, c in calientes if c > 0][:5]
+
+    # Sopa fría: los que no han salido (conteo=0)
+    sopa_fria = [num for num, c in conteo.items() if c == 0]
+
+    # Mostrar
+    if zona_caliente:
+        for n in zona_caliente:
+            numeros_recientes <= html.LI(str(n))
+    else:
+        numeros_recientes <= html.LI("No hay datos")
+
+    if sopa_fria:
+        for n in sopa_fria:
+            numeros_frios <= html.LI(str(n))
+    else:
+        numeros_frios <= html.LI("No hay números fríos")
+
+# --- INICIALIZACIÓN ---
 for i in range(21):
     document['val-numero'] <= html.OPTION(str(i), value=str(i))
 
@@ -153,35 +214,3 @@ document['btn-reiniciar'].bind('click', reiniciar)
 render_carrete(0)
 actualizar_ui()
 timer.set_timeout(lambda: document['loading-screen'].classList.add('loader-hidden'), 500)
-
-from browser import document, window, html
-
-# Abrir modal
-def abrir_modal(ev):
-    document['modal-numeros'].style.display = "flex"
-    actualizar_modal()
-
-# Cerrar modal
-def cerrar_modal(ev):
-    document['modal-numeros'].style.display = "none"
-
-document['btn-modal'].bind('click', abrir_modal)
-document['close-modal'].bind('click', cerrar_modal)
-
-# Actualizar listas del modal
-def actualizar_modal():
-    # Simulación: últimos 5 números y 5 fríos
-    ultimos = [15, 2, 8, 20, 0]  # Aquí pones tu lógica real
-    frios = [1, 3, 7, 12, 18]    # Aquí pones tu lógica real
-
-    numeros_recientes = document['numeros-recientes']
-    numeros_frios = document['numeros-frios']
-
-    numeros_recientes.clear()
-    numeros_frios.clear()
-
-    for n in ultimos:
-        numeros_recientes <= html.LI(str(n))
-
-    for n in frios:
-        numeros_frios <= html.LI(str(n))
