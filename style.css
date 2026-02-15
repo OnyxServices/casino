@@ -92,7 +92,7 @@ body {
 /* --- PANEL DE APUESTAS (ESTRUCTURA DE COLUMNAS) --- */
 .panel-apuestas {
     display: grid;
-    grid-template-columns: 1fr 100px; /* Izquierda: Selección | Derecha: Monto */
+    grid-template-columns: 1fr 100px;
     gap: 15px;
     align-items: end;
     margin: 20px 0;
@@ -156,11 +156,6 @@ input[type="number"] {
     font-size: 1.1rem;
     outline: none;
     box-sizing: border-box;
-}
-
-input[type="number"]:focus {
-    border-color: var(--gold);
-    background: #050505;
 }
 
 /* Quitar flechas de input number */
@@ -267,16 +262,9 @@ input::-webkit-inner-spin-button {
     100% { transform: scaleX(0); transform-origin: right; }
 }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 400px) {
-    .casino-container { padding: 1rem; }
-    .panel-apuestas { grid-template-columns: 1fr 85px; gap: 10px; padding: 10px; }
-    input[type="number"] { font-size: 1rem; padding: 8px; }
-}
-
 /* --- MODAL --- */
 .modal {
-    display: none; /* oculto por defecto */
+    display: none;
     position: fixed;
     z-index: 10000;
     left: 0;
@@ -286,14 +274,15 @@ input::-webkit-inner-spin-button {
     background-color: rgba(0,0,0,0.8);
     justify-content: center;
     align-items: center;
+    padding: 15px;
 }
 
 .modal-content {
     background: var(--glass);
     border-radius: 20px;
     padding: 20px;
-    width: 90%;
-    max-width: 350px;
+    width: 100%;
+    max-width: 360px;
     text-align: center;
     position: relative;
     border: 1px solid var(--border-color);
@@ -340,4 +329,12 @@ input::-webkit-inner-spin-button {
     border-radius: 8px;
     font-weight: bold;
     font-size: 0.85rem;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 400px) {
+    .casino-container { padding: 1rem; }
+    .panel-apuestas { grid-template-columns: 1fr 85px; gap: 10px; padding: 10px; }
+    input[type="number"] { font-size: 1rem; padding: 8px; }
+    .modal-content { padding: 15px; }
 }
