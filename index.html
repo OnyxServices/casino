@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Onyx Casino | Elite Gaming</title>
-    
+
     <!-- Librerías Externas -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -27,10 +27,10 @@
     </div>
 
     <div class="casino-container animate__animated animate__fadeIn">
-        
+
         <!-- Marcador de Tokens -->
         <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
-        
+
         <!-- Visual de la Ruleta -->
         <div id="canvas-wrapper">
             <div id="canvas-container">
@@ -78,36 +78,39 @@
 
         <!-- Botón de Acción -->
         <button class="btn-principal" id="btn-girar">GIRAR RULETA</button>
-        
+
         <!-- Mensajes de Estado -->
         <p id="mensaje">BIENVENIDO A ONYX</p>
-        
+
         <!-- Botón de Reinicio (Oculto inicialmente) -->
         <button class="btn-reiniciar" id="btn-reiniciar" style="display:none;">RECARGAR TOKENS</button>
+
+        <!-- BOTÓN MODAL ESTADÍSTICAS -->
+        <div style="display:flex; justify-content:center; margin-top:12px;">
+            <button class="btn-principal" id="btn-modal">🔥</button>
+        </div>
+
     </div>
 
-<!-- MODAL NÚMEROS -->
-<div id="modal-numeros" class="modal">
-    <div class="modal-content animate__animated animate__zoomIn">
-        <span class="modal-close" id="close-modal">&times;</span>
-        <h2>Números Recientes y Fríos</h2>
-        <div class="modal-section">
-            <h3>Últimos Números</h3>
-            <ul id="numeros-recientes">
-                <!-- Se llenan con JS -->
-            </ul>
-        </div>
-        <div class="modal-section">
-            <h3>Números Fríos</h3>
-            <ul id="numeros-frios">
-                <!-- Se llenan con JS -->
-            </ul>
+    <!-- MODAL NÚMEROS -->
+    <div id="modal-numeros" class="modal">
+        <div class="modal-content animate__animated animate__zoomIn">
+            <span class="modal-close" id="close-modal">&times;</span>
+            <h2>Estadísticas de Giros</h2>
+            <div class="modal-section">
+                <h3>Zona Caliente</h3>
+                <ul id="numeros-recientes">
+                    <!-- Se llenan dinámicamente -->
+                </ul>
+            </div>
+            <div class="modal-section">
+                <h3>Sopa Fría</h3>
+                <ul id="numeros-frios">
+                    <!-- Se llenan dinámicamente -->
+                </ul>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Botón para abrir modal -->
-<button id="btn-modal" class="btn-principal" style="margin-top:15px;">Ver Estadísticas</button>
 
     <!-- Script Lógico -->
     <script type="text/python" src="script.py"></script>
