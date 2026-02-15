@@ -153,3 +153,35 @@ document['btn-reiniciar'].bind('click', reiniciar)
 render_carrete(0)
 actualizar_ui()
 timer.set_timeout(lambda: document['loading-screen'].classList.add('loader-hidden'), 500)
+
+from browser import document, window, html
+
+# Abrir modal
+def abrir_modal(ev):
+    document['modal-numeros'].style.display = "flex"
+    actualizar_modal()
+
+# Cerrar modal
+def cerrar_modal(ev):
+    document['modal-numeros'].style.display = "none"
+
+document['btn-modal'].bind('click', abrir_modal)
+document['close-modal'].bind('click', cerrar_modal)
+
+# Actualizar listas del modal
+def actualizar_modal():
+    # Simulación: últimos 5 números y 5 fríos
+    ultimos = [15, 2, 8, 20, 0]  # Aquí pones tu lógica real
+    frios = [1, 3, 7, 12, 18]    # Aquí pones tu lógica real
+
+    numeros_recientes = document['numeros-recientes']
+    numeros_frios = document['numeros-frios']
+
+    numeros_recientes.clear()
+    numeros_frios.clear()
+
+    for n in ultimos:
+        numeros_recientes <= html.LI(str(n))
+
+    for n in frios:
+        numeros_frios <= html.LI(str(n))
