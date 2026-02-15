@@ -15,6 +15,10 @@ girando = False
 # Historial de giros para estadísticas
 historial_giros = []
 
+# Contador de giros para Tiro Caliente
+giros_totales = 0
+TIRO_CALIENTE_EVERY = 5  # Cada 5 giros se activa
+
 # --- RENDERIZADO DE LA RULETA ---
 def render_carrete(rotation_offset, blur_strength=0):
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -70,7 +74,7 @@ def animar(target_idx, duration, start_time, start_rotation):
 
 # --- INICIO DE GIRO ---
 def iniciar_giro(ev=None):
-    global puntos, girando, VISUAL_OFFSET
+    global puntos, girando, VISUAL_OFFSET, giros_totales
     if girando: return
 
     try:
@@ -96,6 +100,12 @@ def iniciar_giro(ev=None):
     actualizar_ui()
 
     ganador_idx = random.randint(0, len(numeros) - 1)
+
+    # Contamos el giro y definimos si es tiro caliente
+    giros_totales += 1
+    tiro_caliente = (giros_totales % TIRO_CALIENTE_EVERY == 0)
+    document['tiro-caliente'] = tiro_caliente
+
     animar(ganador_idx, 3.5, time.time(), VISUAL_OFFSET)
 
 # --- FINALIZACIÓN DEL JUEGO ---
@@ -107,12 +117,16 @@ def finalizar_juego(resultado):
     # Guardar en historial
     historial_giros.append(resultado)
 
+    # Determinar si fue tiro caliente
+    tiro_caliente = document.get('tiro-caliente', False)
+
     # 1. Check Exacto
     amt_num = int(document['bet-numero'].value or 0)
     if amt_num > 0 and str(resultado) == document['val-numero'].value:
-        premio = amt_num * 20
+        multiplicador = 100 if tiro_caliente else 20
+        premio = amt_num * multiplicador
         ganancia_total += premio
-        msg_detalle.append(f"Número! (+{premio})")
+        msg_detalle.append(f"Número! (+{premio}){' 🔥' if tiro_caliente else ''}")
 
     # 2. Check Paridad (0 no es par ni impar en este casino)
     amt_par = int(document['bet-paridad'].value or 0)
@@ -187,10 +201,11 @@ def actualizar_modal():
 
     # Zona caliente: los 5 números que más han salido
     calientes = sorted(conteo.items(), key=lambda x: x[1], reverse=True)
-    zona_caliente = [num for num, c in calientes if c > 0][:5]
+    zona_caliente = [num for num, c in calientes[:5]]
 
-    # Sopa fría: los que no han salido (conteo=0)
-    sopa_fria = [num for num, c in conteo.items() if c == 0]
+    # Zona fría: los 5 números que menos han salido
+    frios = sorted(conteo.items(), key=lambda x: x[1])
+    zona_fria = [num for num, c in frios[:5]]
 
     # Mostrar
     if zona_caliente:
@@ -199,8 +214,8 @@ def actualizar_modal():
     else:
         numeros_recientes <= html.LI("No hay datos")
 
-    if sopa_fria:
-        for n in sopa_fria:
+    if zona_fria:
+        for n in zona_fria:
             numeros_frios <= html.LI(str(n))
     else:
         numeros_frios <= html.LI("No hay números fríos")
