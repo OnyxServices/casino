@@ -1,10 +1,19 @@
-/* --- VARIABLES Y BASES --- */
+/* --- VARIABLES Y PALETA DE COLORES --- */
 :root {
     --onyx: #050505;
     --gold: #d4af37;
     --gold-light: #f1d592;
-    --glass: rgba(20, 20, 20, 0.98);
-    --border-color: #333;
+    --fire: #ff4b2b;
+    --fire-glow: rgba(255, 75, 43, 0.6);
+    --glass: rgba(15, 15, 15, 0.95);
+    --border: #222;
+    --text-muted: #666;
+}
+
+/* --- RESET Y BASE --- */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -19,7 +28,7 @@ body {
     overflow-x: hidden;
 }
 
-/* --- CONTENEDOR PRINCIPAL --- */
+/* --- CONTENEDOR PRINCIPAL (CARD) --- */
 .casino-container {
     width: 92%;
     max-width: 400px;
@@ -29,15 +38,39 @@ body {
     border-radius: 30px;
     padding: 1.5rem;
     text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
     position: relative;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* --- ESTILOS DEL TIRO ESPECIAL (FUEGO) --- */
+.fire-active {
+    border-color: var(--fire) !important;
+    border-top-color: var(--fire) !important;
+    box-shadow: 0 0 30px var(--fire-glow), inset 0 0 15px rgba(255, 75, 43, 0.2) !important;
+    transform: scale(1.02);
+}
+
+#mensaje.fire-text {
+    color: var(--fire) !important;
+    font-weight: 900;
+    text-shadow: 0 0 15px var(--fire-glow);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* --- MARCADOR Y CONTADORES --- */
 .puntos-display {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 900;
     margin-bottom: 5px;
     letter-spacing: -1px;
+    color: white;
 }
 
 .puntos-display span {
@@ -45,70 +78,76 @@ body {
     color: var(--gold);
     text-transform: uppercase;
     letter-spacing: 2px;
+    display: block;
+    margin-top: -5px;
 }
 
-/* --- RULETA (CANVAS) --- */
+#fire-meter {
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* --- VISUAL DE LA RULETA (CANVAS) --- */
 #canvas-wrapper {
     position: relative;
-    margin: 15px auto;
-    width: 130px;
-    height: 190px;
-    border-radius: 20px;
+    margin: 10px auto 20px;
+    width: 140px;
+    height: 200px;
     background: #080808;
-    padding: 8px;
-    border: 1px solid #222;
-    box-shadow: inset 0 0 20px #000;
+    border-radius: 25px;
+    padding: 10px;
+    border: 1px solid #1a1a1a;
+    box-shadow: inset 0 0 30px #000;
 }
 
 #canvas-container {
     position: relative;
-    width: 100%; height: 100%;
-    border-radius: 12px;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    background: #050505;
+    border-radius: 15px;
 }
 
 .overlay-shadow {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(to bottom, 
-        rgba(0,0,0,1) 0%, 
-        rgba(0,0,0,0) 30%, 
-        rgba(0,0,0,0) 70%, 
-        rgba(0,0,0,1) 100%);
-    z-index: 4;
+        black 0%, transparent 25%, 
+        transparent 75%, black 100%);
+    z-index: 5;
     pointer-events: none;
 }
 
 .win-marker {
     position: absolute;
-    top: 50%; left: 0; right: 0; height: 2px;
+    top: 50%; left: 0; right: 0; height: 3px;
     background: var(--gold);
     transform: translateY(-50%);
     z-index: 10;
     box-shadow: 0 0 15px var(--gold);
 }
 
-/* --- PANEL DE APUESTAS (ESTRUCTURA DE COLUMNAS) --- */
+/* --- PANEL DE APUESTAS --- */
 .panel-apuestas {
     display: grid;
     grid-template-columns: 1fr 100px;
-    gap: 15px;
-    align-items: end;
-    margin: 20px 0;
-    padding: 15px;
+    gap: 12px;
     background: rgba(255, 255, 255, 0.02);
+    padding: 15px;
     border-radius: 20px;
     border: 1px solid #1a1a1a;
+    margin-bottom: 20px;
 }
 
 .col-header {
     font-size: 0.6rem;
-    color: #555;
+    color: var(--text-muted);
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: -5px;
     text-align: left;
 }
 
@@ -117,102 +156,86 @@ body {
 .bet-selection {
     display: flex;
     flex-direction: column;
-    gap: 5px;
     text-align: left;
 }
 
 .bet-title {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--gold-light);
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 4px;
 }
 
 /* --- INPUTS Y SELECTS --- */
-select {
-    width: 100%;
+select, input[type="number"] {
     background: #000;
     border: 1px solid #333;
     color: #fff;
     padding: 10px;
-    border-radius: 10px;
-    font-size: 0.85rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
     outline: none;
-    cursor: pointer;
     transition: border 0.3s;
 }
 
-select:focus { border-color: var(--gold); }
-
 input[type="number"] {
-    width: 100%;
-    background: #000;
-    border: 1px solid #444;
-    color: var(--gold-light);
-    padding: 10px;
-    border-radius: 10px;
     text-align: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-    outline: none;
-    box-sizing: border-box;
+    font-weight: 900;
+    color: var(--gold-light);
 }
 
-/* Quitar flechas de input number */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+select:focus, input:focus {
+    border-color: var(--gold);
 }
 
 /* --- BOTONES --- */
 .btn-principal {
     width: 100%;
-    padding: 16px;
+    padding: 18px;
     background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
-    border-radius: 15px;
+    border: none;
+    border-radius: 18px;
     color: #000;
     font-weight: 900;
     font-size: 1rem;
     text-transform: uppercase;
-    border: none;
     cursor: pointer;
-    box-shadow: 0 4px 0 #8a6d1d;
-    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 5px 0 #8a6d1d;
+    transition: all 0.1s;
 }
 
 .btn-principal:active {
-    transform: translateY(2px);
+    transform: translateY(3px);
     box-shadow: 0 2px 0 #8a6d1d;
 }
 
 .btn-principal:disabled {
     filter: grayscale(1);
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-reiniciar {
     background: transparent;
-    color: #ff4b2b;
-    border: 1px solid #ff4b2b;
-    padding: 8px 15px;
-    border-radius: 8px;
+    color: var(--fire);
+    border: 1px solid var(--fire);
+    padding: 10px 20px;
+    border-radius: 10px;
     margin-top: 15px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.8rem;
+    text-transform: uppercase;
 }
 
 /* --- FEEDBACK --- */
 #mensaje {
-    font-size: 0.85rem;
     margin-top: 15px;
+    font-size: 0.8rem;
     color: #888;
-    min-height: 1.2rem;
-    font-weight: 500;
-    text-transform: uppercase;
     letter-spacing: 1px;
+    min-height: 1.2rem;
 }
 
 /* --- PANTALLA DE CARGA --- */
@@ -222,22 +245,17 @@ input::-webkit-inner-spin-button {
     background: #000;
     z-index: 9999;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.8s ease, visibility 0.8s;
+    justify-content: center; align-items: center;
+    transition: opacity 0.8s;
 }
 
-#loading-screen.loader-hidden {
-    opacity: 0;
-    visibility: hidden;
-}
+.loader-hidden { opacity: 0; visibility: hidden; }
 
-.loader-content { text-align: center; }
 .loader-logo {
     font-size: 3rem;
     font-weight: 900;
     color: var(--gold);
-    letter-spacing: 12px;
+    letter-spacing: 10px;
     margin-bottom: 20px;
 }
 
@@ -249,8 +267,7 @@ input::-webkit-inner-spin-button {
 }
 
 .progress-bar {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     background: var(--gold);
     animation: loading 2s infinite ease-in-out;
 }
@@ -267,74 +284,58 @@ input::-webkit-inner-spin-button {
     display: none;
     position: fixed;
     z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.8);
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    justify-content: center; align-items: center;
 }
 
 .modal-content {
-    background: var(--glass);
-    border-radius: 20px;
-    padding: 20px;
-    width: 100%;
-    max-width: 360px;
+    background: #0a0a0a;
+    padding: 30px;
+    width: 85%;
+    max-width: 350px;
+    border-radius: 25px;
+    border: 1px solid var(--border);
     text-align: center;
     position: relative;
-    border: 1px solid var(--border-color);
 }
 
 .modal-close {
     position: absolute;
-    top: 10px; right: 15px;
-    font-size: 1.5rem;
-    font-weight: bold;
+    top: 15px; right: 20px;
+    font-size: 1.8rem;
     color: var(--gold);
     cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.modal-close:hover {
-    transform: scale(1.2);
-}
-
-.modal-section {
-    margin-top: 15px;
 }
 
 .modal-section h3 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--gold-light);
-    margin-bottom: 8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
 }
 
 .modal-section ul {
     list-style: none;
     padding: 0;
-    margin: 0;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
+    margin-bottom: 20px;
 }
 
-.modal-section ul li {
-    background: #111;
-    color: #fff;
-    padding: 6px 10px;
+.modal-section li {
+    background: #1a1a1a;
+    padding: 8px 12px;
     border-radius: 8px;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 /* --- RESPONSIVE --- */
-@media (max-width: 400px) {
+@media (max-width: 380px) {
     .casino-container { padding: 1rem; }
-    .panel-apuestas { grid-template-columns: 1fr 85px; gap: 10px; padding: 10px; }
-    input[type="number"] { font-size: 1rem; padding: 8px; }
-    .modal-content { padding: 15px; }
+    .panel-apuestas { grid-template-columns: 1fr 80px; gap: 8px; }
+    .puntos-display { font-size: 2rem; }
 }

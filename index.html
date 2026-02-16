@@ -4,34 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Onyx Casino | Elite Gaming</title>
-
-    <!-- Librerías Externas -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body onload="brython()">
 
-    <!-- PANTALLA DE CARGA -->
     <div id="loading-screen">
         <div class="loader-content">
             <div class="loader-logo animate__animated animate__pulse animate__infinite">ONYX</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar"></div>
-            </div>
+            <div class="progress-bar-container"><div class="progress-bar"></div></div>
         </div>
     </div>
 
-    <div class="casino-container animate__animated animate__fadeIn">
-
-        <!-- Marcador de Tokens -->
+    <div class="casino-container animate__animated animate__fadeIn" id="main-card">
         <div class="puntos-display" id="puntos">1,000 <span>TOKENS</span></div>
 
-        <!-- Visual de la Ruleta -->
+        <div id="fire-meter" style="font-size: 0.8rem; font-weight: bold; color: #666; margin-bottom: 10px;">
+            PRÓXIMO TIRO ESPECIAL: <span id="giros-restantes" style="color: #d4af37;">5</span>
+        </div>
+
         <div id="canvas-wrapper">
             <div id="canvas-container">
                 <div class="overlay-shadow"></div>
@@ -40,22 +34,16 @@
             </div>
         </div>
 
-        <!-- PANEL DE APUESTAS (2 COLUMNAS) -->
         <div class="panel-apuestas">
-            <!-- Encabezados -->
             <span class="col-header">MÉTODO DE JUEGO</span>
             <span class="col-header right">CANTIDAD</span>
 
-            <!-- Fila 1: Número Exacto -->
             <div class="bet-selection">
                 <span class="bet-title">NÚMERO (x20)</span>
-                <select id="val-numero">
-                    <!-- Opciones generadas por Python -->
-                </select>
+                <select id="val-numero"></select>
             </div>
-            <input type="number" id="bet-numero" value="50" min="0" placeholder="0">
+            <input type="number" id="bet-numero" value="50" min="0">
 
-            <!-- Fila 2: Paridad -->
             <div class="bet-selection">
                 <span class="bet-title">PARIDAD (x1.9)</span>
                 <select id="val-paridad">
@@ -63,9 +51,8 @@
                     <option value="impar">IMPAR</option>
                 </select>
             </div>
-            <input type="number" id="bet-paridad" value="50" min="0" placeholder="0">
+            <input type="number" id="bet-paridad" value="0" min="0">
 
-            <!-- Fila 3: Rango -->
             <div class="bet-selection">
                 <span class="bet-title">RANGO (x1.9)</span>
                 <select id="val-rango">
@@ -73,47 +60,34 @@
                     <option value="alto">ALTO (11-20)</option>
                 </select>
             </div>
-            <input type="number" id="bet-rango" value="50" min="0" placeholder="0">
+            <input type="number" id="bet-rango" value="0" min="0">
         </div>
 
-        <!-- Botón de Acción -->
         <button class="btn-principal" id="btn-girar">GIRAR RULETA</button>
-
-        <!-- Mensajes de Estado -->
         <p id="mensaje">BIENVENIDO A ONYX</p>
-
-        <!-- Botón de Reinicio (Oculto inicialmente) -->
         <button class="btn-reiniciar" id="btn-reiniciar" style="display:none;">RECARGAR TOKENS</button>
 
-        <!-- BOTÓN MODAL ESTADÍSTICAS -->
         <div style="display:flex; justify-content:center; margin-top:12px;">
-            <button class="btn-principal" id="btn-modal">🔥</button>
+            <button class="btn-principal" id="btn-modal" style="width:50px; padding:10px;">🔥</button>
         </div>
-
     </div>
 
-    <!-- MODAL NÚMEROS -->
+    <!-- MODAL ESTADÍSTICAS -->
     <div id="modal-numeros" class="modal">
-        <div class="modal-content animate__animated animate__zoomIn">
+        <div class="modal-content">
             <span class="modal-close" id="close-modal">&times;</span>
-            <h2>Estadísticas de Giros</h2>
+            <h2>Estadísticas</h2>
             <div class="modal-section">
-                <h3>Zona Caliente</h3>
-                <ul id="numeros-recientes">
-                    <!-- Se llenan dinámicamente -->
-                </ul>
+                <h3>Números Calientes</h3>
+                <ul id="numeros-recientes"></ul>
             </div>
             <div class="modal-section">
-                <h3>Sopa Fría</h3>
-                <ul id="numeros-frios">
-                    <!-- Se llenan dinámicamente -->
-                </ul>
+                <h3>Números Fríos</h3>
+                <ul id="numeros-frios"></ul>
             </div>
         </div>
     </div>
 
-    <!-- Script Lógico -->
     <script type="text/python" src="script.py"></script>
-
 </body>
 </html>
